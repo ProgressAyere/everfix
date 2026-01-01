@@ -1,10 +1,11 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
   const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,6 +14,20 @@ export default function AuthPage() {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('userLoggedIn');
+    if (loggedIn) setIsAlreadyLoggedIn(true);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('userLoggedIn');
+    setIsAlreadyLoggedIn(false);
+  };
+
+  const handleGoToDashboard = () => {
+    router.push('/dashboardC');
+  };
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   
@@ -53,10 +68,15 @@ export default function AuthPage() {
 
     setIsSubmitting(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsSubmitting(false);
-      if (isSignUp) {
+      localStorage.setItem('userLoggedIn', 'true');
+      
+      const redirectPath = localStorage.getItem('redirectAfterLogin');
+      if (redirectPath) {
+        localStorage.removeItem('redirectAfterLogin');
+        router.push(redirectPath);
+      } else if (isSignUp) {
         router.push(formData.role === 'customer' ? '/dashboardC' : '/dashboardE');
       } else {
         router.push('/dashboardC');
@@ -66,6 +86,33 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center px-4 py-12">
+      {isAlreadyLoggedIn ? (
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">You're Already Signed In</h1>
+            <p className="text-gray-600">Continue to your dashboard or sign out to switch accounts.</p>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={handleGoToDashboard}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={handleLogout}
+              className="w-full bg-white text-gray-700 py-3 rounded-lg font-semibold border-2 border-gray-300 hover:bg-gray-50 transition"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      ) : (
       <div className="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden grid md:grid-cols-2">
         
         {/* Illustration Side */}
@@ -217,6 +264,7 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

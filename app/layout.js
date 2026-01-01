@@ -7,7 +7,9 @@ export const metadata = {
   description: "Verified engineers. Secure pickup. Real-time tracking across Nigeria.",
   icons: {
     icon: '/everfix-logo.svg',
+    apple: '/icon-192.png',
   },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({ children }) {

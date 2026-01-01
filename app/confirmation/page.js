@@ -1,11 +1,19 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
+const mockEngineers = [
+  { id: 1, name: 'Chukwudi Okafor', rating: 4.8, completedJobs: 127, specialization: 'iPhone Specialist', estimatedArrival: '30-45 minutes', distance: '2.3 km away' },
+  { id: 2, name: 'Tunde Bakare', rating: 4.6, completedJobs: 98, specialization: 'Android & Samsung Expert', estimatedArrival: '40-50 minutes', distance: '3.1 km away' },
+  { id: 3, name: 'Ada Nwosu', rating: 4.9, completedJobs: 156, specialization: 'All Brands Specialist', estimatedArrival: '25-35 minutes', distance: '1.8 km away' },
+  { id: 4, name: 'Ibrahim Musa', rating: 4.7, completedJobs: 112, specialization: 'Screen Repair Expert', estimatedArrival: '35-45 minutes', distance: '2.7 km away' }
+];
 
 export default function ConfirmationPage() {
   const router = useRouter();
   const [isConfirming, setIsConfirming] = useState(false);
-  const [engineerAssigned, setEngineerAssigned] = useState(true); // Toggle for pending state
+  const [selectedEngineer, setSelectedEngineer] = useState(null);
+  const [showEngineerList, setShowEngineerList] = useState(true);
 
   // Mock data - would come from previous form/API
   const pickupDetails = {
@@ -29,13 +37,25 @@ export default function ConfirmationPage() {
   };
 
   const handleConfirm = async () => {
+    if (!selectedEngineer) return;
+    
     setIsConfirming(true);
+    
+    // Vibrate phone on confirmation
+    if ('vibrate' in navigator) {
+      navigator.vibrate(200); // Vibrate for 200ms
+    }
     
     // Simulate API call
     setTimeout(() => {
       setIsConfirming(false);
       router.push('/dashboardC');
     }, 2000);
+  };
+
+  const handleSelectEngineer = (engineer) => {
+    setSelectedEngineer(engineer);
+    setShowEngineerList(false);
   };
 
   return (
@@ -100,28 +120,81 @@ export default function ConfirmationPage() {
           </button>
         </div>
 
-        {/* Engineer Assignment */}
-        {engineerAssigned ? (
+        {/* Engineer Selection */}
+        {showEngineerList ? (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Assigned Engineer</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Select Your Engineer</h2>
+            <p className="text-gray-600 mb-6">Choose from available engineers in your area</p>
+            
+            <div className="space-y-4">
+              {mockEngineers.map(engineer => (
+                <div
+                  key={engineer.id}
+                  onClick={() => handleSelectEngineer(engineer)}
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-500 cursor-pointer transition"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl font-bold text-blue-600">{engineer.name.charAt(0)}</span>
+                    </div>
+                    
+                    <div className="flex-1">
+                      <h3 className="font-bold text-gray-900 text-lg">{engineer.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{engineer.specialization}</p>
+                      
+                      <div className="flex items-center gap-4 text-sm mb-2">
+                        <div className="flex items-center">
+                          <svg className="w-4 h-4 text-yellow-400 fill-current mr-1" viewBox="0 0 20 20">
+                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+                          </svg>
+                          <span className="font-semibold">{engineer.rating}</span>
+                        </div>
+                        <span className="text-gray-600">{engineer.completedJobs} jobs</span>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-sm text-gray-700">
+                        <span>⏱️ {engineer.estimatedArrival}</span>
+                        <span>📍 {engineer.distance}</span>
+                      </div>
+                    </div>
+
+                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition">
+                      Select
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Selected Engineer</h2>
+              <button
+                onClick={() => setShowEngineerList(true)}
+                className="text-blue-600 text-sm font-semibold hover:underline"
+              >
+                Change Engineer
+              </button>
+            </div>
             
             <div className="flex items-start gap-4">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl font-bold text-blue-600">{assignedEngineer.name.charAt(0)}</span>
+                <span className="text-2xl font-bold text-blue-600">{selectedEngineer?.name.charAt(0)}</span>
               </div>
               
               <div className="flex-1">
-                <h3 className="font-bold text-gray-900 text-lg">{assignedEngineer.name}</h3>
-                <p className="text-sm text-gray-600 mb-2">{assignedEngineer.specialization}</p>
+                <h3 className="font-bold text-gray-900 text-lg">{selectedEngineer?.name}</h3>
+                <p className="text-sm text-gray-600 mb-2">{selectedEngineer?.specialization}</p>
                 
                 <div className="flex items-center gap-4 text-sm mb-3">
                   <div className="flex items-center">
                     <svg className="w-4 h-4 text-yellow-400 fill-current mr-1" viewBox="0 0 20 20">
                       <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
                     </svg>
-                    <span className="font-semibold">{assignedEngineer.rating}</span>
+                    <span className="font-semibold">{selectedEngineer?.rating}</span>
                   </div>
-                  <span className="text-gray-600">{assignedEngineer.completedJobs} jobs completed</span>
+                  <span className="text-gray-600">{selectedEngineer?.completedJobs} jobs completed</span>
                 </div>
 
                 <div className="bg-blue-50 rounded-lg p-3 space-y-1">
@@ -129,13 +202,13 @@ export default function ConfirmationPage() {
                     <svg className="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span className="text-gray-700">ETA: <span className="font-semibold">{assignedEngineer.estimatedArrival}</span></span>
+                    <span className="text-gray-700">ETA: <span className="font-semibold">{selectedEngineer?.estimatedArrival}</span></span>
                   </div>
                   <div className="flex items-center text-sm">
                     <svg className="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
-                    <span className="text-gray-700">{assignedEngineer.distance}</span>
+                    <span className="text-gray-700">{selectedEngineer?.distance}</span>
                   </div>
                 </div>
               </div>
@@ -147,23 +220,13 @@ export default function ConfirmationPage() {
               </p>
             </div>
           </div>
-        ) : (
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Engineer Assignment</h2>
-            
-            <div className="text-center py-8">
-              <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-gray-700 font-medium mb-2">Finding the best engineer for you...</p>
-              <p className="text-sm text-gray-500">This usually takes less than a minute</p>
-            </div>
-          </div>
         )}
 
         {/* Confirmation Button */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <button
             onClick={handleConfirm}
-            disabled={!engineerAssigned || isConfirming}
+            disabled={!selectedEngineer || isConfirming}
             className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 active:bg-blue-800 transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
           >
             {isConfirming ? (
@@ -187,7 +250,7 @@ export default function ConfirmationPage() {
         {/* Cancel Option */}
         <div className="text-center mt-6">
           <button
-            onClick={() => router.push('/dashboardC')}
+            onClick={() => router.push('/pickup')}
             className="text-gray-600 hover:text-gray-900 font-medium"
           >
             Cancel Request

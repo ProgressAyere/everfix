@@ -77,6 +77,18 @@ const deviceData = {
   }
 };
 
+const validColors = [
+  'Black', 'White', 'Silver', 'Gray', 'Grey', 'Space Gray', 'Space Grey',
+  'Gold', 'Rose Gold', 'Pink', 'Red', 'Blue', 'Navy', 'Sky Blue', 'Midnight Blue',
+  'Green', 'Midnight Green', 'Alpine Green', 'Purple', 'Violet', 'Yellow',
+  'Orange', 'Bronze', 'Copper', 'Titanium', 'Graphite', 'Starlight',
+  'Midnight', 'Phantom Black', 'Phantom Silver', 'Phantom White',
+  'Mystic Bronze', 'Mystic Black', 'Cloud Navy', 'Awesome Black',
+  'Awesome White', 'Awesome Blue', 'Pearl White', 'Ceramic White',
+  'Matte Black', 'Glossy Black', 'Jet Black', 'Deep Purple', 'Sierra Blue',
+  'Pacific Blue', 'Coral', 'Lavender', 'Mint', 'Cream', 'Beige', 'Brown'
+];
+
 export default function PickupPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -94,6 +106,7 @@ export default function PickupPage() {
   const [isStateDropdownOpen, setIsStateDropdownOpen] = useState(false);
   const [isLgaDropdownOpen, setIsLgaDropdownOpen] = useState(false);
   const [stateError, setStateError] = useState('');
+  const [colorError, setColorError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const stateDropdownRef = useRef(null);
   const lgaDropdownRef = useRef(null);
@@ -111,6 +124,16 @@ export default function PickupPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const savedRequest = localStorage.getItem('pickupRequest');
+    if (savedRequest) {
+      const { formData: savedFormData, location: savedLocation } = JSON.parse(savedRequest);
+      setFormData(savedFormData);
+      setLocation(savedLocation);
+      setStep(2);
+    }
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -119,6 +142,15 @@ export default function PickupPage() {
       ...(name === 'brand' && { model: '' }),
       ...(name === 'deviceType' && { brand: '', model: '', problem: '' })
     }));
+    if (name === 'color') setColorError('');
+  };
+
+  const validateColor = () => {
+    if (formData.color && !validColors.some(c => c.toLowerCase() === formData.color.trim().toLowerCase())) {
+      setColorError('The color code is incorrect, please choose a specific color');
+      return false;
+    }
+    return true;
   };
 
   const handleStateSearch = (value) => {
@@ -152,10 +184,21 @@ export default function PickupPage() {
       if (!location.lga) setStateError('Please select a local government area');
       return;
     }
+    
+    const isLoggedIn = localStorage.getItem('userLoggedIn');
+    
+    if (!isLoggedIn) {
+      localStorage.setItem('pickupRequest', JSON.stringify({ formData, location }));
+      localStorage.setItem('redirectAfterLogin', '/pickup');
+      router.push('/login');
+      return;
+    }
+    
     setIsSubmitting(true);
     
     setTimeout(() => {
       setIsSubmitting(false);
+      localStorage.setItem('pickupRequest', JSON.stringify({ formData, location }));
       router.push('/confirmation');
     }, 1500);
   };
@@ -291,8 +334,11 @@ export default function PickupPage() {
                   onChange={handleChange}
                   required
                   placeholder="e.g., Black, Silver, Blue"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                    colorError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                 />
+                {colorError && <p className="text-red-500 text-sm mt-1">{colorError}</p>}
               </div>
 
               {formData.problem === 'Others' && (
@@ -324,8 +370,11 @@ export default function PickupPage() {
 
               <button
                 type="button"
-                onClick={() => setStep(2)}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                onClick={() => {
+                  if (validateColor()) setStep(2);
+                }}
+                disabled={!formData.brand || !formData.model || !formData.problem || !formData.condition || !formData.color || (formData.problem === 'Others' && !formData.description)}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next: Select Location
               </button>
