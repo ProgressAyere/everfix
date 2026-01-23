@@ -1,5 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 const mockJobs = [
   { id: 'ORD-2024-001', device: 'iPhone 14 Pro', problem: 'Screen Replacement', customer: 'Chioma A.', location: 'Ikeja, Lagos', status: 'Picked Up', priority: 'High', estimatedTime: '2 hours', pickupTime: '10:30 AM' },
@@ -16,6 +17,23 @@ export default function EngineerDashboard() {
   const [jobs, setJobs] = useState(mockJobs);
   const [filter, setFilter] = useState('All');
   const [confirmingStatus, setConfirmingStatus] = useState(null);
+  const [verificationStatus, setVerificationStatus] = useState('unverified');
+
+  useEffect(() => {
+    const status = localStorage.getItem('engineerVerificationStatus') || 'unverified';
+    setVerificationStatus(status);
+  }, []);
+
+  const getVerificationBadge = () => {
+    switch(verificationStatus) {
+      case 'verified':
+        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">✓ Verified</span>;
+      case 'pending':
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">⏳ Pending</span>;
+      default:
+        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">⚠ Unverified</span>;
+    }
+  };
 
   const handleStatusUpdate = (jobId, newStatus) => {
     setConfirmingStatus({ jobId, newStatus });
@@ -61,9 +79,22 @@ export default function EngineerDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Engineer Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage your assigned repair jobs</p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Engineer Dashboard</h1>
+            <p className="text-gray-600 mt-1">Manage your assigned repair jobs</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {getVerificationBadge()}
+            {verificationStatus !== 'verified' && (
+              <Link
+                href="/verification"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              >
+                Verify to Work as Engineer
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Stats Overview */}
