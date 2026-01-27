@@ -227,7 +227,7 @@ export default function CustomerProfile() {
                 <h2 className="text-lg font-bold text-gray-900">Repair History</h2>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto -mx-6 px-6">
                 <table className="w-full min-w-[600px]">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
