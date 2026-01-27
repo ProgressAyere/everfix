@@ -13,12 +13,18 @@ export default function Header() {
   const menuRef = useRef(null);
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('userLoggedIn');
-    const role = localStorage.getItem('userRole') || 'customer';
-    const name = localStorage.getItem('userName') || 'User';
-    setIsLoggedIn(!!loggedIn);
-    setUserRole(role);
-    setUserName(name);
+    const updateUserState = () => {
+      const loggedIn = localStorage.getItem('userLoggedIn');
+      const role = localStorage.getItem('userRole') || 'customer';
+      const name = localStorage.getItem('userName') || 'User';
+      setIsLoggedIn(!!loggedIn);
+      setUserRole(role);
+      setUserName(name);
+    };
+    
+    updateUserState();
+    window.addEventListener('storage', updateUserState);
+    return () => window.removeEventListener('storage', updateUserState);
   }, []);
 
   useEffect(() => {
@@ -39,6 +45,8 @@ export default function Header() {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
     setIsLoggedIn(false);
+    setUserRole('customer');
+    setUserName('User');
     setIsProfileOpen(false);
     window.location.href = '/';
   };

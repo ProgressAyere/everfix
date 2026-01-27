@@ -73,6 +73,7 @@ export default function AuthPage() {
       localStorage.setItem('userLoggedIn', 'true');
       localStorage.setItem('userRole', isSignUp ? formData.role : 'customer');
       localStorage.setItem('userName', isSignUp ? formData.name : formData.email.split('@')[0]);
+      window.dispatchEvent(new Event('storage'));
       
       const redirectPath = localStorage.getItem('redirectAfterLogin');
       if (redirectPath) {
