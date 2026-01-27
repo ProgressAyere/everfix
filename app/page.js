@@ -28,8 +28,9 @@ export default function Home() {
   return (
     <div className="pt-16">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative bg-cover bg-center text-white py-20" style={{ backgroundImage: 'url(/background-image.png)' }}>
+        <div className="absolute inset-0 bg-blue-900 bg-opacity-60"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
             Fast, Safe Phone Repairs at Your Doorstep
           </h1>
