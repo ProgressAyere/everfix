@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserCircle, CreditCard, Smartphone, MapPin, Users, Wrench, Camera } from 'lucide-react';
 
 export default function VerificationPage() {
   const router = useRouter();
@@ -155,7 +156,7 @@ export default function VerificationPage() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">👤</div>
+                <UserCircle className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Face Verification</h2>
                 <p className="text-gray-600">Upload a clear photo of yourself for identity verification</p>
                 <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -180,7 +181,7 @@ export default function VerificationPage() {
                     </div>
                   ) : (
                     <div>
-                      <div className="text-gray-400 text-4xl mb-2">📷</div>
+                      <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                       <p className="text-gray-700 font-medium">Click to upload photo</p>
                       <p className="text-sm text-gray-500 mt-1">JPG, PNG (Max 5MB)</p>
                     </div>
@@ -199,7 +200,7 @@ export default function VerificationPage() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">🆔</div>
+                <CreditCard className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">NIN Verification</h2>
                 <p className="text-gray-600">Enter your National Identification Number</p>
                 <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -233,7 +234,7 @@ export default function VerificationPage() {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📱</div>
+                <Smartphone className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Verification</h2>
                 <p className="text-gray-600">Verify your phone number to receive job notifications</p>
               </div>
@@ -290,7 +291,7 @@ export default function VerificationPage() {
           {currentStep === 4 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📍</div>
+                <MapPin className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Address Verification</h2>
                 <p className="text-gray-600">Provide your business or residential address</p>
               </div>
@@ -343,7 +344,7 @@ export default function VerificationPage() {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">👥</div>
+                <Users className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Next of Kin</h2>
                 <p className="text-gray-600">Emergency contact for accountability and safety</p>
                 <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -397,7 +398,7 @@ export default function VerificationPage() {
           {currentStep === 6 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">🔧</div>
+                <Wrench className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Professional Details</h2>
                 <p className="text-gray-600">Tell us about your repair expertise</p>
               </div>

@@ -10,6 +10,7 @@ export default function Header() {
   const [userRole, setUserRole] = useState('customer');
   const [userName, setUserName] = useState('Guest');
   const profileRef = useRef(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     const loggedIn = localStorage.getItem('userLoggedIn');
@@ -24,6 +25,9 @@ export default function Header() {
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setIsProfileOpen(false);
+      }
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -126,7 +130,7 @@ export default function Header() {
           </div>
 
           {/* Mobile Menu Button & Profile */}
-          <div className="md:hidden flex items-center space-x-3">
+          <div className="md:hidden flex items-center space-x-3" ref={menuRef}>
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700"

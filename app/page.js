@@ -30,19 +30,50 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative bg-cover bg-center text-white py-20" style={{ backgroundImage: 'url(/background-image.png)' }}>
         <div className="absolute inset-0 bg-blue-900 bg-opacity-60"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Fast, Safe Phone Repairs at Your Doorstep
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Verified engineers. Secure pickup. Real-time tracking. All across Nigeria.
-          </p>
-          <Link 
-            href="/pickup" 
-            className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition"
-          >
-            Request a Pickup
-          </Link>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            {/* Mobile Video - Shows on mobile only */}
+            <div className="lg:hidden w-full max-w-sm mx-auto">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-auto rounded-3xl shadow-2xl"
+              >
+                <source src="/devices.mp4" type="video/mp4" />
+              </video>
+            </div>
+            
+            {/* Text Content */}
+            <div className="flex-1 text-center lg:text-left">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
+                Fast, Safe Phone Repairs at Your Doorstep
+              </h1>
+              <p className="text-xl md:text-2xl mb-8 text-blue-100">
+                Verified engineers. Secure pickup. Real-time tracking. All across Nigeria.
+              </p>
+              <Link 
+                href="/pickup" 
+                className="inline-block bg-white text-blue-600 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition"
+              >
+                Request a Pickup
+              </Link>
+            </div>
+            
+            {/* Desktop Video - Shows on desktop only */}
+            <div className="hidden lg:block flex-shrink-0">
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-96 h-auto rounded-3xl shadow-2xl"
+              >
+                <source src="/devices.mp4" type="video/mp4" />
+              </video>
+            </div>
+          </div>
         </div>
       </section>
 

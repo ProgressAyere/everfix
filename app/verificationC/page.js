@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { UserCircle, Smartphone, MapPin, Users, Lock, Camera } from 'lucide-react';
 
 export default function CustomerVerificationPage() {
   const router = useRouter();
@@ -31,12 +32,12 @@ export default function CustomerVerificationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const steps = [
-    { id: 1, title: 'Basic Identity', icon: '👤', required: true },
-    { id: 2, title: 'Phone Verification', icon: '📱', required: true },
-    { id: 3, title: 'Pickup Address', icon: '📍', required: true },
-    { id: 4, title: 'Device Info', icon: '📱', required: false },
-    { id: 5, title: 'Emergency Contact', icon: '👥', required: false },
-    { id: 6, title: 'Security & Consent', icon: '🔒', required: true }
+    { id: 1, title: 'Basic Identity', icon: UserCircle, required: true },
+    { id: 2, title: 'Phone Verification', icon: Smartphone, required: true },
+    { id: 3, title: 'Pickup Address', icon: MapPin, required: true },
+    { id: 4, title: 'Device Info', icon: Smartphone, required: false },
+    { id: 5, title: 'Emergency Contact', icon: Users, required: false },
+    { id: 6, title: 'Security & Consent', icon: Lock, required: true }
   ];
 
   const nigerianStates = ['Lagos', 'Abuja', 'Kano', 'Rivers', 'Oyo', 'Kaduna', 'Ogun', 'Anambra'];
@@ -191,7 +192,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">👤</div>
+                <UserCircle className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Basic Identity Information</h2>
                 <p className="text-gray-600">Help us know who we're serving so we can provide personalized support</p>
               </div>
@@ -237,7 +238,7 @@ export default function CustomerVerificationPage() {
                       </div>
                     ) : (
                       <div>
-                        <div className="text-gray-400 text-3xl mb-2">📷</div>
+                        <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
                         <p className="text-sm text-gray-700">Click to upload photo</p>
                         <p className="text-xs text-gray-500 mt-1">Helps engineers identify you during pickup</p>
                       </div>
@@ -253,7 +254,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 2 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📱</div>
+                <Smartphone className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Verification</h2>
                 <p className="text-gray-600">Verify your number so engineers can contact you for pickup coordination</p>
               </div>
@@ -319,7 +320,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 3 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📍</div>
+                <MapPin className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Pickup Address Verification</h2>
                 <p className="text-gray-600">Where should we pick up your device? This ensures accurate and timely service</p>
               </div>
@@ -380,7 +381,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 4 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">📱</div>
+                <Smartphone className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Device Ownership Confirmation</h2>
                 <p className="text-gray-600">Optional: Pre-fill device details to speed up future repair requests</p>
               </div>
@@ -417,7 +418,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 5 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">👥</div>
+                <Users className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Emergency/Alternate Contact</h2>
                 <p className="text-gray-600">Optional: Someone we can reach if we can't contact you during pickup</p>
               </div>
@@ -470,7 +471,7 @@ export default function CustomerVerificationPage() {
           {currentStep === 6 && (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <div className="text-4xl mb-3">🔒</div>
+                <Lock className="w-16 h-16 mx-auto mb-3 text-blue-600" />
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Security & Consent</h2>
                 <p className="text-gray-600">Review and accept our terms to complete verification</p>
               </div>
