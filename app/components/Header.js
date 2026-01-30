@@ -58,7 +58,7 @@ export default function Header() {
     { label: 'Verification', href: '/verificationC' },
     { label: 'Tracking', href: '/tracking' },
     { label: 'Support', href: '/support' },
-    { label: 'Rate an Engineer', href: '/profileE' }
+    { label: 'Rate an Engineer', href: '/rateC' }
   ];
 
   const engineerMenuItems = [

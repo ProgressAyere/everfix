@@ -1,36 +1,36 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
+
+const profileData = {
+  name: 'Chioma Adebayo',
+  email: 'chioma.a@email.com',
+  phone: '+234 704 949 0588',
+  verified: true,
+  memberSince: 'January 2024'
+};
+
+const addresses = [
+  { id: 1, type: 'Home', address: '15 Allen Avenue, Ikeja, Lagos', default: true },
+  { id: 2, type: 'Work', address: '23 Victoria Island, Lagos', default: false }
+];
+
+const repairHistory = [
+  { id: 'ORD-2024-001', date: '2024-01-15', device: 'iPhone 14 Pro', engineer: 'Chukwudi Okafor', status: 'Completed', rating: 5 },
+  { id: 'ORD-2023-089', date: '2023-12-10', device: 'Samsung Galaxy S23', engineer: 'Tunde Bakare', status: 'Completed', rating: 4 },
+  { id: 'ORD-2023-078', date: '2023-11-05', device: 'iPhone 13', engineer: 'Ada Nwosu', status: 'Completed', rating: 5 }
+];
+
+const activeOrders = [
+  { id: 'ORD-2024-002', device: 'MacBook Pro M2', status: 'In Repair', progress: 60 }
+];
 
 export default function CustomerProfile() {
   const [editingAddress, setEditingAddress] = useState(null);
 
-  const profileData = {
-    name: 'Chioma Adebayo',
-    email: 'chioma.a@email.com',
-    phone: '+234 803 456 7890',
-    verified: true,
-    memberSince: 'January 2024'
-  };
-
-  const addresses = [
-    { id: 1, type: 'Home', address: '15 Allen Avenue, Ikeja, Lagos', default: true },
-    { id: 2, type: 'Work', address: '23 Victoria Island, Lagos', default: false }
-  ];
-
-  const repairHistory = [
-    { id: 'ORD-2024-001', date: '2024-01-15', device: 'iPhone 14 Pro', engineer: 'Chukwudi Okafor', status: 'Completed', rating: 5 },
-    { id: 'ORD-2023-089', date: '2023-12-10', device: 'Samsung Galaxy S23', engineer: 'Tunde Bakare', status: 'Completed', rating: 4 },
-    { id: 'ORD-2023-078', date: '2023-11-05', device: 'iPhone 13', engineer: 'Ada Nwosu', status: 'Completed', rating: 5 }
-  ];
-
-  const activeOrders = [
-    { id: 'ORD-2024-002', device: 'MacBook Pro M2', status: 'In Repair', progress: 60 }
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 pt-20 pb-12 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
         
         {/* Header */}
         <div className="mb-8">
@@ -47,7 +47,7 @@ export default function CustomerProfile() {
           <div className="lg:col-span-1 space-y-6">
             
             {/* Profile Overview */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full overflow-hidden">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -55,8 +55,8 @@ export default function CustomerProfile() {
                 <h2 className="text-lg font-bold text-gray-900">Profile Overview</h2>
               </div>
 
-              <div className="flex flex-col items-center mb-6">
-                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-3">
+              <div className="flex flex-col md:flex-row md:justify-between items-center mb-6">
+                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-3 md:mb-0">
                   <span className="text-4xl font-bold text-blue-600">{profileData.name.charAt(0)}</span>
                 </div>
                 <button className="text-sm text-blue-600 hover:underline">Change Photo</button>
@@ -69,7 +69,7 @@ export default function CustomerProfile() {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-semibold text-gray-900">{profileData.email}</p>
+                  <p className="font-semibold text-gray-900 break-words">{profileData.email}</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Phone</p>
@@ -95,7 +95,7 @@ export default function CustomerProfile() {
             </div>
 
             {/* Active Orders */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -121,8 +121,8 @@ export default function CustomerProfile() {
                           <span className="text-gray-600">Progress</span>
                           <span className="font-semibold text-gray-900">{order.progress}%</span>
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${order.progress}%` }}></div>
+                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                          <div className="bg-yellow-500 h-2 rounded-full transition-all" style={{width: `${order.progress}%`}}></div>
                         </div>
                       </div>
                       <Link href="/tracking" className="mt-3 block text-center text-blue-600 font-semibold text-sm hover:underline">
@@ -137,7 +137,7 @@ export default function CustomerProfile() {
             </div>
 
             {/* Support & Help */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -178,7 +178,7 @@ export default function CustomerProfile() {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Saved Addresses */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                   <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,14 +212,14 @@ export default function CustomerProfile() {
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">{addr.address}</p>
+                    <p className="text-sm text-gray-600 break-words">{addr.address}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Repair History */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
@@ -227,31 +227,31 @@ export default function CustomerProfile() {
                 <h2 className="text-lg font-bold text-gray-900">Repair History</h2>
               </div>
 
-              <div className="overflow-x-auto -mx-6 px-6">
-                <table className="w-full min-w-[600px]">
+              <div className="overflow-x-auto max-w-full">
+                <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Order ID</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Device</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Engineer</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Rating</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Order ID</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Device</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Engineer</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Rating</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {repairHistory.map(repair => (
                       <tr key={repair.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{repair.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{repair.date}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{repair.device}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900">{repair.engineer}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{repair.id}</td>
+                        <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{repair.date}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{repair.device}</td>
+                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{repair.engineer}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
                             {repair.status}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex">
                             {[...Array(5)].map((_, i) => (
                               <svg key={i} className={`w-4 h-4 ${i < repair.rating ? 'text-yellow-400' : 'text-gray-300'} fill-current`} viewBox="0 0 20 20">
@@ -263,12 +263,12 @@ export default function CustomerProfile() {
                       </tr>
                     ))}
                   </tbody>
-                </table>
+                  </table>
               </div>
             </div>
 
             {/* Ratings & Feedback */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
               <div className="flex items-center gap-2 mb-4">
                 <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -304,7 +304,7 @@ export default function CustomerProfile() {
             <div className="grid md:grid-cols-2 gap-6">
               
               {/* Security Settings */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
                 <div className="flex items-center gap-2 mb-4">
                   <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -329,7 +329,7 @@ export default function CustomerProfile() {
               </div>
 
               {/* Notification Preferences */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
+              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
                 <div className="flex items-center gap-2 mb-4">
                   <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />

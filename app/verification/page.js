@@ -9,6 +9,10 @@ export default function VerificationPage() {
   const [formData, setFormData] = useState({
     facePhoto: null,
     facePhotoPreview: null,
+    ninFront: null,
+    ninFrontPreview: null,
+    ninBack: null,
+    ninBackPreview: null,
     nin: '',
     phone: '',
     otp: '',
@@ -206,6 +210,75 @@ export default function VerificationPage() {
                 <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <p className="text-sm text-blue-800">🔒 Your NIN is verified securely and never shared publicly</p>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Upload NIN Card Images</label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-2">Front Side</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({ ...formData, ninFront: file, ninFrontPreview: reader.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="ninFront"
+                      />
+                      <label htmlFor="ninFront" className="cursor-pointer">
+                        {formData.ninFrontPreview ? (
+                          <img src={formData.ninFrontPreview} alt="NIN Front" className="w-full h-32 object-cover rounded mb-2" />
+                        ) : (
+                          <div>
+                            <Camera className="w-8 h-8 mx-auto text-gray-400 mb-1" />
+                            <p className="text-xs text-gray-600">Upload Front</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-2">Back Side</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({ ...formData, ninBack: file, ninBackPreview: reader.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="ninBack"
+                      />
+                      <label htmlFor="ninBack" className="cursor-pointer">
+                        {formData.ninBackPreview ? (
+                          <img src={formData.ninBackPreview} alt="NIN Back" className="w-full h-32 object-cover rounded mb-2" />
+                        ) : (
+                          <div>
+                            <Camera className="w-8 h-8 mx-auto text-gray-400 mb-1" />
+                            <p className="text-xs text-gray-600">Upload Back</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Upload clear images of both sides of your NIN card</p>
               </div>
 
               <div>

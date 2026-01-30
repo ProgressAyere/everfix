@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { CheckCircle, AlertTriangle } from 'lucide-react';
 
 const deviceData = {
   phone: {
@@ -58,11 +59,11 @@ export default function CustomerDashboard() {
   const getVerificationBadge = () => {
     switch(verificationStatus) {
       case 'verified':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">✓ Verified</span>;
+        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1"><CheckCircle size={16} /> Verified</span>;
       case 'partial':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">⚠ Partially Verified</span>;
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} /> Partially Verified</span>;
       default:
-        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">⚠ Unverified</span>;
+        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} /> Unverified</span>;
     }
   };
 
@@ -137,33 +138,33 @@ export default function CustomerDashboard() {
         {/* Order History */}
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Order History</h2>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Device</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Problem</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Order ID</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Device</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Problem</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Status</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap">Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {mockOrderHistory.map(order => (
                   <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{order.id}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{order.device}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{order.problem}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">{order.id}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{order.device}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{order.problem}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
                         {order.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{order.date}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700 whitespace-nowrap">{order.date}</td>
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
           </div>
         </section>
       </div>

@@ -15,6 +15,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/everfix-logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+      </head>
       <body>
         <Header />
         <main className="min-h-screen">{children}</main>

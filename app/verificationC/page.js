@@ -10,6 +10,11 @@ export default function CustomerVerificationPage() {
     fullName: '',
     profilePhoto: null,
     profilePhotoPreview: null,
+    ninFront: null,
+    ninFrontPreview: null,
+    ninBack: null,
+    ninBackPreview: null,
+    nin: '',
     email: '',
     emailVerified: false,
     phone: '',
@@ -247,6 +252,88 @@ export default function CustomerVerificationPage() {
                 </div>
               </div>
               {errors.identity && <p className="text-red-500 text-sm">{errors.identity}</p>}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Upload NIN Card Images (Optional)</label>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-2">Front Side</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({ ...formData, ninFront: file, ninFrontPreview: reader.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="ninFrontC"
+                      />
+                      <label htmlFor="ninFrontC" className="cursor-pointer">
+                        {formData.ninFrontPreview ? (
+                          <img src={formData.ninFrontPreview} alt="NIN Front" className="w-full h-32 object-cover rounded mb-2" />
+                        ) : (
+                          <div>
+                            <Camera className="w-8 h-8 mx-auto text-gray-400 mb-1" />
+                            <p className="text-xs text-gray-600">Upload Front</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-2">Back Side</label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setFormData({ ...formData, ninBack: file, ninBackPreview: reader.result });
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="hidden"
+                        id="ninBackC"
+                      />
+                      <label htmlFor="ninBackC" className="cursor-pointer">
+                        {formData.ninBackPreview ? (
+                          <img src={formData.ninBackPreview} alt="NIN Back" className="w-full h-32 object-cover rounded mb-2" />
+                        ) : (
+                          <div>
+                            <Camera className="w-8 h-8 mx-auto text-gray-400 mb-1" />
+                            <p className="text-xs text-gray-600">Upload Back</p>
+                          </div>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-500 mt-2">Upload clear images of both sides of your NIN card for faster verification</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">National Identification Number - NIN (Optional)</label>
+                <input
+                  type="text"
+                  maxLength="11"
+                  value={formData.nin}
+                  onChange={(e) => setFormData({ ...formData, nin: e.target.value.replace(/\D/g, '') })}
+                  placeholder="12345678901"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-sm text-gray-500 mt-1">Enter your 11-digit NIN for enhanced account security</p>
+              </div>
             </div>
           )}
 
