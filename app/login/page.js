@@ -80,7 +80,13 @@ export default function AuthPage() {
         localStorage.removeItem('redirectAfterLogin');
         router.push(redirectPath);
       } else if (isSignUp) {
-        router.push(formData.role === 'customer' ? '/dashboardC' : '/dashboardE');
+        if (formData.role === 'customer') {
+          router.push('/dashboardC');
+        } else if (formData.role === 'engineer') {
+          router.push('/dashboardE');
+        } else if (formData.role === 'rider') {
+          router.push('/dashboardR');
+        }
       } else {
         router.push('/dashboardC');
       }
@@ -203,7 +209,7 @@ export default function AuthPage() {
             {isSignUp && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">I am a</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, role: 'customer' }))}
@@ -227,6 +233,18 @@ export default function AuthPage() {
                   >
                     <div className="font-semibold">Engineer</div>
                     <div className="text-xs text-gray-500">Provide service</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, role: 'rider' }))}
+                    className={`p-4 border-2 rounded-lg text-center transition ${
+                      formData.role === 'rider'
+                        ? 'border-blue-600 bg-blue-50 text-blue-600'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="font-semibold">Rider</div>
+                    <div className="text-xs text-gray-500">Deliver devices</div>
                   </button>
                 </div>
               </div>

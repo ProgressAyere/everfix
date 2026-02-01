@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Truck, Wrench, Phone, MessageSquare, FileText, Star, X } from 'lucide-react';
 
 const stages = [
   { id: 1, name: 'Pending', description: 'Order placed, awaiting pickup' },
@@ -103,9 +104,9 @@ export default function TrackingPage() {
                       
                       {currentStage === stage.id && (
                         <div className="mt-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                          <p className="text-sm text-blue-800 font-medium">
-                            {stage.id === 2 && '🚗 Your device is on the way to the repair center'}
-                            {stage.id === 3 && '🔧 Engineer is currently working on your device'}
+                          <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
+                            {stage.id === 2 && <><Truck className="w-4 h-4" /> Your device is on the way to the repair center</>}
+                            {stage.id === 3 && <><Wrench className="w-4 h-4" /> Engineer is currently working on your device</>}
                           </p>
                         </div>
                       )}
@@ -189,16 +190,18 @@ export default function TrackingPage() {
 
               <a 
                 href={`tel:${currentSupport.phone}`}
-                className="block w-full bg-blue-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-blue-700 transition mb-3"
+                className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white py-3 rounded-lg text-center font-semibold hover:bg-blue-700 transition mb-3"
               >
-                📞 Call Now
+                <Phone className="w-5 h-5" />
+                Call Now
               </a>
 
               <Link 
                 href="/support"
-                className="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition"
+                className="flex items-center justify-center gap-2 w-full bg-gray-100 text-gray-700 py-3 rounded-lg text-center font-semibold hover:bg-gray-200 transition"
               >
-                💬 Chat Support
+                <MessageSquare className="w-5 h-5" />
+                Chat Support
               </Link>
             </div>
 
@@ -207,14 +210,17 @@ export default function TrackingPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
               
               <div className="space-y-2">
-                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <span className="text-gray-900 font-medium">📋 View Receipt</span>
+                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-900 font-medium">View Receipt</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <span className="text-gray-900 font-medium">⭐ Rate Service</span>
+                <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition flex items-center gap-2">
+                  <Star className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-900 font-medium">Rate Service</span>
                 </button>
-                <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition">
-                  <span className="text-red-700 font-medium">❌ Cancel Order</span>
+                <button className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition flex items-center gap-2">
+                  <X className="w-5 h-5 text-red-600" />
+                  <span className="text-red-700 font-medium">Cancel Order</span>
                 </button>
               </div>
             </div>

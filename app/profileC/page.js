@@ -1,365 +1,536 @@
 'use client';
-import { useState, useMemo } from 'react';
-import Link from 'next/link';
+import { useState } from 'react';
+import { User, Phone, Mail, MapPin, Edit2, CheckCircle, AlertCircle, Clock, Smartphone, History, Wallet, CreditCard, DollarSign, Star, Shield, Lock, Bell, Settings, HelpCircle, FileText, LogOut, Trash2, EyeOff, ChevronDown, ChevronUp, Plus, X, Eye, EyeOff as EyeOffIcon } from 'lucide-react';
 
-const profileData = {
-  name: 'Chioma Adebayo',
-  email: 'chioma.a@email.com',
-  phone: '+234 704 949 0588',
-  verified: true,
-  memberSince: 'January 2024'
-};
+export default function ProfileC() {
+  const [expandedSections, setExpandedSections] = useState({});
+  const [showEditModal, setShowEditModal] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
-const addresses = [
-  { id: 1, type: 'Home', address: '15 Allen Avenue, Ikeja, Lagos', default: true },
-  { id: 2, type: 'Work', address: '23 Victoria Island, Lagos', default: false }
-];
-
-const repairHistory = [
-  { id: 'ORD-2024-001', date: '2024-01-15', device: 'iPhone 14 Pro', engineer: 'Chukwudi Okafor', status: 'Completed', rating: 5 },
-  { id: 'ORD-2023-089', date: '2023-12-10', device: 'Samsung Galaxy S23', engineer: 'Tunde Bakare', status: 'Completed', rating: 4 },
-  { id: 'ORD-2023-078', date: '2023-11-05', device: 'iPhone 13', engineer: 'Ada Nwosu', status: 'Completed', rating: 5 }
-];
-
-const activeOrders = [
-  { id: 'ORD-2024-002', device: 'MacBook Pro M2', status: 'In Repair', progress: 60 }
-];
-
-export default function CustomerProfile() {
-  const [editingAddress, setEditingAddress] = useState(null);
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20 pb-12 overflow-x-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 max-w-full">
-        
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/dashboardC" className="text-blue-600 hover:underline mb-2 inline-block">
-            ← Back to Dashboard
-          </Link>
-          <h1 className="text-3xl font-bold text-gray-900">My Profile</h1>
-          <p className="text-gray-600 mt-1">Manage your account and preferences</p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-6">
-          
-          {/* Left Column */}
-          <div className="lg:col-span-1 space-y-6">
-            
-            {/* Profile Overview */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full overflow-hidden">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <h2 className="text-lg font-bold text-gray-900">Profile Overview</h2>
-              </div>
-
-              <div className="flex flex-col md:flex-row md:justify-between items-center mb-6">
-                <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-3 md:mb-0">
-                  <span className="text-4xl font-bold text-blue-600">{profileData.name.charAt(0)}</span>
-                </div>
-                <button className="text-sm text-blue-600 hover:underline">Change Photo</button>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600">Full Name</p>
-                  <p className="font-semibold text-gray-900">{profileData.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Email</p>
-                  <p className="font-semibold text-gray-900 break-words">{profileData.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Phone</p>
-                  <p className="font-semibold text-gray-900">{profileData.phone}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Account Status</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                      ✓ Verified
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Member Since</p>
-                  <p className="font-semibold text-gray-900">{profileData.memberSince}</p>
-                </div>
-              </div>
-
-              <Link href="/settingsPage" className="mt-4 block w-full bg-blue-600 text-white py-2 rounded-lg text-center font-semibold hover:bg-blue-700 transition">
-                Edit Profile
-              </Link>
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Profile Header */}
+      <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white p-6 rounded-b-3xl shadow-lg mt-[65]">
+        <div className="flex items-start gap-4">
+          <div className="relative">
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center text-blue-600 text-2xl font-bold">
+              JD
             </div>
-
-            {/* Active Orders */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h2 className="text-lg font-bold text-gray-900">Active Orders</h2>
-              </div>
-
-              {activeOrders.length > 0 ? (
-                <div className="space-y-3">
-                  {activeOrders.map(order => (
-                    <div key={order.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-semibold text-gray-900">{order.id}</p>
-                          <p className="text-sm text-gray-600">{order.device}</p>
-                        </div>
-                        <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
-                          {order.status}
-                        </span>
-                      </div>
-                      <div className="mt-3">
-                        <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">Progress</span>
-                          <span className="font-semibold text-gray-900">{order.progress}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                          <div className="bg-yellow-500 h-2 rounded-full transition-all" style={{width: `${order.progress}%`}}></div>
-                        </div>
-                      </div>
-                      <Link href="/tracking" className="mt-3 block text-center text-blue-600 font-semibold text-sm hover:underline">
-                        Track Order →
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-center py-4">No active orders</p>
-              )}
-            </div>
-
-            {/* Support & Help */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <h2 className="text-lg font-bold text-gray-900">Support & Help</h2>
-              </div>
-
-              <div className="space-y-2">
-                <Link href="/support" className="block px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                    <span className="font-medium text-gray-900">Contact Support</span>
-                  </div>
-                </Link>
-                <button className="w-full px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-left">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <span className="font-medium text-gray-900">Report an Issue</span>
-                  </div>
-                </button>
-                <Link href="/support" className="block px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="font-medium text-gray-900">FAQ</span>
-                  </div>
-                </Link>
-              </div>
-            </div>
+            <button className="absolute bottom-0 right-0 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg">
+              <Edit2 size={14} />
+            </button>
           </div>
-
-          {/* Right Column */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Saved Addresses */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  </svg>
-                  <h2 className="text-lg font-bold text-gray-900">Saved Addresses</h2>
-                </div>
-                <button className="text-blue-600 font-semibold text-sm hover:underline">+ Add Address</button>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                {addresses.map(addr => (
-                  <div key={addr.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="font-semibold text-gray-900">{addr.type}</p>
-                        {addr.default && (
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">Default</span>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <button className="text-blue-600 hover:text-blue-800">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button className="text-red-600 hover:text-red-800">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 break-words">{addr.address}</p>
-                  </div>
-                ))}
-              </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold">John Doe</h1>
+              <CheckCircle size={18} className="text-green-400" />
             </div>
-
-            {/* Repair History */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-                <h2 className="text-lg font-bold text-gray-900">Repair History</h2>
-              </div>
-
-              <div className="overflow-x-auto max-w-full">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Order ID</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Date</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Device</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Engineer</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Status</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 whitespace-nowrap">Rating</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {repairHistory.map(repair => (
-                      <tr key={repair.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">{repair.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 whitespace-nowrap">{repair.date}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{repair.device}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">{repair.engineer}</td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                            {repair.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <svg key={i} className={`w-4 h-4 ${i < repair.rating ? 'text-yellow-400' : 'text-gray-300'} fill-current`} viewBox="0 0 20 20">
-                                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                              </svg>
-                            ))}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  </table>
-              </div>
-            </div>
-
-            {/* Ratings & Feedback */}
-            <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-              <div className="flex items-center gap-2 mb-4">
-                <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-                <h2 className="text-lg font-bold text-gray-900">Ratings & Feedback</h2>
-              </div>
-
-              <div className="space-y-3">
-                {repairHistory.slice(0, 2).map(repair => (
-                  <div key={repair.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold text-gray-900">{repair.engineer}</p>
-                        <p className="text-sm text-gray-600">{repair.device} - {repair.date}</p>
-                      </div>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} className={`w-5 h-5 ${i < repair.rating ? 'text-yellow-400' : 'text-gray-300'} fill-current`} viewBox="0 0 20 20">
-                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                    <button className="mt-2 text-blue-600 text-sm font-semibold hover:underline">
-                      Edit Review
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Security & Notifications */}
-            <div className="grid md:grid-cols-2 gap-6">
-              
-              {/* Security Settings */}
-              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-                <div className="flex items-center gap-2 mb-4">
-                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  <h2 className="text-lg font-bold text-gray-900">Security</h2>
-                </div>
-
-                <div className="space-y-2">
-                  <Link href="/settingsPage" className="block px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                    <p className="font-medium text-gray-900">Change Password</p>
-                    <p className="text-sm text-gray-600">Last changed 30 days ago</p>
-                  </Link>
-                  <button className="w-full px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-left">
-                    <p className="font-medium text-gray-900">Two-Factor Auth</p>
-                    <p className="text-sm text-gray-600">Coming soon</p>
-                  </button>
-                  <button className="w-full px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition text-left">
-                    <p className="font-medium text-gray-900">Login Activity</p>
-                    <p className="text-sm text-gray-600">View recent logins</p>
-                  </button>
-                </div>
-              </div>
-
-              {/* Notification Preferences */}
-              <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 w-full">
-                <div className="flex items-center gap-2 mb-4">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                  <h2 className="text-lg font-bold text-gray-900">Notifications</h2>
-                </div>
-
-                <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
-                    <span className="text-sm font-medium text-gray-900">Email Updates</span>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 text-blue-600 rounded" />
-                  </label>
-                  <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
-                    <span className="text-sm font-medium text-gray-900">SMS Alerts</span>
-                    <input type="checkbox" className="w-5 h-5 text-blue-600 rounded" />
-                  </label>
-                  <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer">
-                    <span className="text-sm font-medium text-gray-900">Push Notifications</span>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 text-blue-600 rounded" />
-                  </label>
-                </div>
-
-                <Link href="/settingsPage" className="mt-4 block text-center text-blue-600 font-semibold text-sm hover:underline">
-                  Manage All Settings →
-                </Link>
-              </div>
+            <p className="text-blue-100 text-sm">ID: CUST-2024-1234</p>
+            <div className="mt-2 inline-flex items-center gap-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+              <CheckCircle size={12} />
+              <span>Verified Customer</span>
             </div>
           </div>
         </div>
       </div>
+
+      <div className="p-4 space-y-4">
+        {/* Personal Information */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <User size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold">Personal Information</h2>
+            </div>
+            <button className="text-blue-600 text-sm font-medium">Edit</button>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <Phone size={18} className="text-gray-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs text-gray-500">Phone Number</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">+234 801 234 5678</p>
+                  <CheckCircle size={14} className="text-green-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <Mail size={18} className="text-gray-600 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs text-gray-500">Email Address</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-medium">john.doe@email.com</p>
+                  <CheckCircle size={14} className="text-green-500" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+              <MapPin size={18} className="text-gray-600 mt-0.5" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs text-gray-500">Primary Address</p>
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Default</span>
+                </div>
+                <p className="text-sm font-medium">15 Admiralty Way, Lekki Phase 1, Lagos</p>
+              </div>
+            </div>
+
+            <button className="w-full flex items-center justify-center gap-2 text-blue-600 text-sm font-medium py-2 border border-blue-200 rounded-lg">
+              <Plus size={16} />
+              Add Another Address
+            </button>
+          </div>
+        </div>
+
+        {/* Device Management */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Smartphone size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold">Device Management</h2>
+            </div>
+            <button className="text-blue-600 text-sm font-medium">Add Device</button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="border border-gray-200 rounded-lg p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="font-medium">iPhone 13 Pro</p>
+                  <p className="text-xs text-gray-500">IMEI: XXXXX1234</p>
+                </div>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">In Repair</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
+                <span>2 repairs</span>
+                <span>•</span>
+                <span>Last: Jan 15, 2024</span>
+              </div>
+              <button className="text-blue-600 text-xs font-medium mt-2">View History</button>
+            </div>
+
+            <div className="border border-gray-200 rounded-lg p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="font-medium">Samsung Galaxy S22</p>
+                  <p className="text-xs text-gray-500">IMEI: XXXXX5678</p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Active</span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-600 mt-2">
+                <span>1 repair</span>
+                <span>•</span>
+                <span>Last: Dec 10, 2023</span>
+              </div>
+              <button className="text-blue-600 text-xs font-medium mt-2">View History</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Order and Repair History */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <History size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold">Order & Repair History</h2>
+            </div>
+            <button className="text-blue-600 text-sm font-medium">View All</button>
+          </div>
+
+          <div className="space-y-3">
+            <div className="border-l-4 border-purple-500 bg-purple-50 rounded-r-lg p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="font-medium text-sm">Screen Replacement</p>
+                  <p className="text-xs text-gray-500">Order #ORD-2024-0156</p>
+                </div>
+                <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Ongoing</span>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">iPhone 13 Pro • Engineer: Mike O.</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Jan 20, 2024</span>
+                <button className="text-blue-600 font-medium">Track</button>
+              </div>
+            </div>
+
+            <div className="border-l-4 border-green-500 bg-green-50 rounded-r-lg p-3">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="font-medium text-sm">Battery Replacement</p>
+                  <p className="text-xs text-gray-500">Order #ORD-2023-0892</p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Completed</span>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">Samsung Galaxy S22 • Engineer: Sarah K.</p>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500">Dec 10, 2023</span>
+                <button className="text-blue-600 font-medium">View Details</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Payments and Billing */}
+        <div className="bg-blue-50 rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Wallet size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold">Payments & Billing</h2>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-xl p-4 mb-3">
+            <p className="text-xs text-blue-100 mb-1">Wallet Balance</p>
+            <p className="text-2xl font-bold">₦12,500.00</p>
+            <button className="mt-3 bg-white text-blue-600 text-sm font-medium px-4 py-2 rounded-lg">
+              Top Up
+            </button>
+          </div>
+
+          <div className="space-y-2 mb-3">
+            <div className="bg-white rounded-lg p-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <CreditCard size={20} className="text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">•••• 4532</p>
+                  <p className="text-xs text-gray-500">Expires 12/25</p>
+                </div>
+              </div>
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Default</span>
+            </div>
+
+            <button className="w-full flex items-center justify-center gap-2 text-blue-600 text-sm font-medium py-2 bg-white border border-blue-200 rounded-lg">
+              <Plus size={16} />
+              Add Payment Method
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            <button onClick={() => toggleSection('transactions')} className="w-full flex items-center justify-between text-sm font-medium py-2 px-3 bg-white rounded-lg">
+              <span>Transaction History</span>
+              {expandedSections.transactions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+            
+            {expandedSections.transactions && (
+              <div className="bg-white rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="font-medium">Screen Repair Payment</p>
+                    <p className="text-xs text-gray-500">Jan 20, 2024</p>
+                  </div>
+                  <p className="font-medium text-red-600">-₦15,000</p>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <p className="font-medium">Wallet Top-up</p>
+                    <p className="text-xs text-gray-500">Jan 18, 2024</p>
+                  </div>
+                  <p className="font-medium text-green-600">+₦20,000</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs text-gray-500 mt-3">Last updated: Jan 20, 2024 at 3:45 PM</p>
+        </div>
+
+        {/* Ratings and Reviews */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Star size={20} className="text-blue-600" />
+              <h2 className="text-lg font-bold">Ratings & Reviews</h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">12</p>
+              <p className="text-xs text-gray-600">Total Ratings</p>
+            </div>
+            <div className="text-center p-3 bg-gray-50 rounded-lg">
+              <p className="text-2xl font-bold text-yellow-600">4.8</p>
+              <p className="text-xs text-gray-600">Avg Rating</p>
+            </div>
+            <div className="text-center p-3 bg-orange-50 rounded-lg">
+              <p className="text-2xl font-bold text-orange-600">2</p>
+              <p className="text-xs text-gray-600">Pending</p>
+            </div>
+          </div>
+
+          <button className="w-full text-blue-600 text-sm font-medium py-2 border border-blue-200 rounded-lg">
+            View All Reviews
+          </button>
+        </div>
+
+        {/* Security and Privacy */}
+        <div className="bg-orange-50 rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Shield size={20} className="text-orange-600" />
+              <h2 className="text-lg font-bold">Security & Privacy</h2>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <button onClick={() => setShowPasswordModal(true)} className="w-full flex items-center justify-between p-3 bg-white rounded-lg">
+              <div className="flex items-center gap-3">
+                <Lock size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Change Password</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+
+            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+              <div className="flex items-center gap-3">
+                <Shield size={18} className="text-gray-600" />
+                <div>
+                  <p className="text-sm font-medium">Two-Factor Authentication</p>
+                  <p className="text-xs text-green-600">Enabled</p>
+                </div>
+              </div>
+              <button onClick={() => setShow2FAModal(true)} className="text-blue-600 text-sm font-medium">Manage</button>
+            </div>
+
+            <button onClick={() => toggleSection('sessions')} className="w-full flex items-center justify-between p-3 bg-white rounded-lg">
+              <div className="flex items-center gap-3">
+                <Clock size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Active Sessions</span>
+              </div>
+              {expandedSections.sessions ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {expandedSections.sessions && (
+              <div className="bg-white rounded-lg p-3 space-y-2">
+                <div className="flex items-start justify-between text-sm">
+                  <div>
+                    <p className="font-medium">iPhone 13 Pro • Safari</p>
+                    <p className="text-xs text-gray-500">Lagos, Nigeria • Current</p>
+                    <p className="text-xs text-gray-400">Last active: Just now</p>
+                  </div>
+                </div>
+                <div className="flex items-start justify-between text-sm">
+                  <div>
+                    <p className="font-medium">Windows PC • Chrome</p>
+                    <p className="text-xs text-gray-500">Lagos, Nigeria</p>
+                    <p className="text-xs text-gray-400">Last active: 2 hours ago</p>
+                  </div>
+                  <button className="text-red-600 text-xs font-medium">End</button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between p-3 bg-white rounded-lg">
+              <div className="flex items-center gap-3">
+                <Eye size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Data Sharing</span>
+              </div>
+              <button className="text-blue-600 text-sm font-medium">Settings</button>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-500 mt-3">Last updated: Jan 15, 2024 at 10:30 AM</p>
+        </div>
+
+        {/* Preferences */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Settings size={20} className="text-blue-600" />
+            <h2 className="text-lg font-bold">Preferences</h2>
+          </div>
+
+          <div className="space-y-2">
+            <button onClick={() => toggleSection('notifications')} className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Bell size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Notification Settings</span>
+              </div>
+              {expandedSections.notifications ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {expandedSections.notifications && (
+              <div className="bg-gray-50 rounded-lg p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Order Updates</span>
+                  <div className="w-12 h-6 bg-green-500 rounded-full flex items-center px-1">
+                    <div className="w-4 h-4 bg-white rounded-full ml-auto"></div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm">Promotions</span>
+                  <div className="w-12 h-6 bg-gray-300 rounded-full flex items-center px-1">
+                    <div className="w-4 h-4 bg-white rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Star size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Preferred Engineers</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+
+            <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Clock size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Delivery Windows</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Support and Safety */}
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <HelpCircle size={20} className="text-blue-600" />
+            <h2 className="text-lg font-bold">Support & Safety</h2>
+          </div>
+
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <HelpCircle size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Customer Support</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+
+            <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Report a Dispute</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+
+            <button className="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <FileText size={18} className="text-gray-600" />
+                <span className="text-sm font-medium">Warranties & Claims</span>
+              </div>
+              <ChevronDown size={16} className="text-gray-400 rotate-[-90deg]" />
+            </button>
+
+            <button className="w-full flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center gap-3">
+                <Shield size={18} className="text-red-600" />
+                <span className="text-sm font-medium text-red-600">Emergency Assistance</span>
+              </div>
+              <ChevronDown size={16} className="text-red-400 rotate-[-90deg]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Account Actions */}
+        <div className="bg-white rounded-xl shadow-sm p-4 border-2 border-gray-200">
+          <h2 className="text-lg font-bold mb-4 text-gray-700">Account Actions</h2>
+          
+          <div className="space-y-2">
+            <button onClick={() => setShowLogoutModal(true)} className="w-full flex items-center justify-center gap-2 p-3 bg-gray-100 text-gray-700 rounded-lg font-medium">
+              <LogOut size={18} />
+              <span>Log Out</span>
+            </button>
+
+            <button onClick={() => setShowDeactivateModal(true)} className="w-full flex items-center justify-center gap-2 p-3 bg-orange-50 text-orange-600 rounded-lg font-medium border border-orange-200">
+              <EyeOff size={18} />
+              <span>Deactivate Account</span>
+            </button>
+
+            <button onClick={() => setShowDeleteAccountModal(true)} className="w-full flex items-center justify-center gap-2 p-3 bg-red-50 text-red-600 rounded-lg font-medium border border-red-200">
+              <Trash2 size={18} />
+              <span>Delete Account</span>
+            </button>
+          </div>
+
+          <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex gap-2">
+              <AlertCircle size={16} className="text-yellow-600 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-yellow-800">Deactivating or deleting your account is permanent and cannot be undone. All data will be lost.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold mb-2">Log Out</h3>
+            <p className="text-sm text-gray-600 mb-4">Are you sure you want to log out?</p>
+            <div className="flex gap-2">
+              <button onClick={() => setShowLogoutModal(false)} className="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
+              <button className="flex-1 py-2 bg-gray-700 text-white rounded-lg font-medium">Log Out</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeactivateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle size={20} className="text-orange-600" />
+              <h3 className="text-lg font-bold">Deactivate Account</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">Your account will be temporarily disabled. You can reactivate it anytime by logging in.</p>
+            <div className="flex gap-2">
+              <button onClick={() => setShowDeactivateModal(false)} className="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
+              <button className="flex-1 py-2 bg-orange-600 text-white rounded-lg font-medium">Deactivate</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteAccountModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertCircle size={20} className="text-red-600" />
+              <h3 className="text-lg font-bold text-red-600">Delete Account</h3>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">This action is permanent and cannot be undone. All your data, orders, and payment information will be permanently deleted.</p>
+            <div className="mb-4">
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Type "DELETE" to confirm:</label>
+              <input 
+                type="text" 
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                placeholder="DELETE"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setShowDeleteAccountModal(false); setDeleteConfirmText(''); }} className="flex-1 py-2 border border-gray-300 rounded-lg font-medium">Cancel</button>
+              <button 
+                disabled={deleteConfirmText !== 'DELETE'}
+                className="flex-1 py-2 bg-red-600 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Delete Forever
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

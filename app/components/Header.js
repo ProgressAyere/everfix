@@ -9,6 +9,7 @@ export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('customer');
   const [userName, setUserName] = useState('Guest');
+  const [isOnline, setIsOnline] = useState(false);
   const profileRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -17,9 +18,11 @@ export default function Header() {
       const loggedIn = localStorage.getItem('userLoggedIn');
       const role = localStorage.getItem('userRole') || 'customer';
       const name = localStorage.getItem('userName') || 'User';
+      const online = localStorage.getItem('riderOnlineStatus') === 'true';
       setIsLoggedIn(!!loggedIn);
       setUserRole(role);
       setUserName(name);
+      setIsOnline(online);
     };
     
     updateUserState();
@@ -44,11 +47,19 @@ export default function Header() {
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
+    localStorage.removeItem('riderOnlineStatus');
     setIsLoggedIn(false);
     setUserRole('customer');
     setUserName('User');
+    setIsOnline(false);
     setIsProfileOpen(false);
     window.location.href = '/';
+  };
+
+  const toggleOnlineStatus = () => {
+    const newStatus = !isOnline;
+    setIsOnline(newStatus);
+    localStorage.setItem('riderOnlineStatus', newStatus.toString());
   };
 
   const customerMenuItems = [
@@ -65,13 +76,24 @@ export default function Header() {
     { label: 'Dashboard', href: '/dashboardE' },
     { label: 'Profile', href: '/profileE' },
     { label: 'Account Settings', href: '/settingsPage' },
-    { label: 'Verification', href: '/verification' },
+    { label: 'Verification', href: '/verificationE' },
     { label: 'Tracking', href: '/tracking' },
     { label: 'Support', href: '/support' },
     { label: 'Your Ratings', href: '/profileE' }
   ];
 
-  const menuItems = userRole === 'engineer' ? engineerMenuItems : customerMenuItems;
+  const riderMenuItems = [
+    { label: 'Dashboard', href: '/dashboardR' },
+    { label: 'Profile', href: '/profileR' },
+    { label: 'Active Deliveries', href: '/activeDeliveries' },
+    { label: 'Delivery History', href: '/deliveryHistory' },
+    { label: 'Verification', href: '/verificationR' },
+    { label: 'Ratings & Feedback', href: '/rateR' },
+    { label: 'Navigation / Maps', href: '/navigation' },
+    { label: 'Account Settings', href: '/settingsR' }
+  ];
+
+  const menuItems = userRole === 'engineer' ? engineerMenuItems : userRole === 'rider' ? riderMenuItems : customerMenuItems;
 
   return (
     <header className="bg-white shadow-sm fixed w-full top-0 z-50">
@@ -106,6 +128,30 @@ export default function Header() {
                         <p className="text-sm font-semibold text-gray-900">{userName}</p>
                         <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                       </div>
+                      {userRole === 'rider' && (
+                        <div className="px-4 py-3 border-b border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Availability Status</span>
+                            <button
+                              onClick={toggleOnlineStatus}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                isOnline ? 'bg-green-500' : 'bg-gray-300'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  isOnline ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                          <p className={`text-xs mt-1 ${
+                            isOnline ? 'text-green-600' : 'text-gray-500'
+                          }`}>
+                            {isOnline ? 'Online' : 'Offline'}
+                          </p>
+                        </div>
+                      )}
                       {menuItems.map((item) => (
                         <Link
                           key={item.label}
@@ -167,6 +213,30 @@ export default function Header() {
                         <p className="text-sm font-semibold text-gray-900">{userName}</p>
                         <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                       </div>
+                      {userRole === 'rider' && (
+                        <div className="px-4 py-3 border-b border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Availability Status</span>
+                            <button
+                              onClick={toggleOnlineStatus}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                isOnline ? 'bg-green-500' : 'bg-gray-300'
+                              }`}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                  isOnline ? 'translate-x-6' : 'translate-x-1'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                          <p className={`text-xs mt-1 ${
+                            isOnline ? 'text-green-600' : 'text-gray-500'
+                          }`}>
+                            {isOnline ? 'Online' : 'Offline'}
+                          </p>
+                        </div>
+                      )}
                       {menuItems.map((item) => (
                         <Link
                           key={item.label}
