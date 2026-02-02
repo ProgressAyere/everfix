@@ -99,6 +99,7 @@ export default function PickupPage() {
     problem: '',
     condition: '',
     color: '',
+    pickupDate: '',
     description: '',
     otherInfo: ''
   });
@@ -341,6 +342,19 @@ export default function PickupPage() {
                 {colorError && <p className="text-red-500 text-sm mt-1">{colorError}</p>}
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pickup Date</label>
+                <input
+                  type="date"
+                  name="pickupDate"
+                  value={formData.pickupDate}
+                  onChange={handleChange}
+                  required
+                  min={new Date().toISOString().split('T')[0]}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
               {formData.problem === 'Others' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
@@ -373,7 +387,7 @@ export default function PickupPage() {
                 onClick={() => {
                   if (validateColor()) setStep(2);
                 }}
-                disabled={!formData.brand || !formData.model || !formData.problem || !formData.condition || !formData.color || (formData.problem === 'Others' && !formData.description)}
+                disabled={!formData.brand || !formData.model || !formData.problem || !formData.condition || !formData.color || !formData.pickupDate || (formData.problem === 'Others' && !formData.description)}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next: Select Location
