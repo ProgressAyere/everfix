@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, ShieldCheck, Wrench } from 'lucide-react';
 
 const deviceData = {
   phone: {
@@ -61,9 +61,9 @@ export default function CustomerDashboard() {
       case 'verified':
         return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1"><CheckCircle size={16} /> Verified</span>;
       case 'partial':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} /> Partially Verified</span>;
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-yellow-600" /> Partially Verified</span>;
       default:
-        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} /> Unverified</span>;
+        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-red-600" /> Unverified</span>;
     }
   };
 
@@ -79,22 +79,31 @@ export default function CustomerDashboard() {
           </div>
           <div className="flex items-center gap-3">
             {getVerificationBadge()}
-            {verificationStatus !== 'verified' && (
-              <Link
-                href="/verificationC"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-              >
-                Click to Verify Customer Account
-              </Link>
-            )}
             <Link
               href="/pickup"
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2"
             >
-              + Request Fix
+              <Wrench size={24} />
+              Request Fix
             </Link>
           </div>
         </div>
+
+        {/* Verification Alert Banner */}
+        {verificationStatus !== 'verified' && (
+          <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-hidden">
+            <Link href="/verificationC" className="block">
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={24} className="text-blue-600 flex-shrink-0" />
+                <div className="flex-1 overflow-hidden">
+                  <div className="animate-marquee whitespace-nowrap text-blue-700 font-medium">
+                    Verify Identity to secure account now • Verify Identity to secure account now • Verify Identity to secure account now • Verify Identity to secure account now
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* Active Repair Requests */}
         <section className="mb-8">
@@ -168,6 +177,21 @@ export default function CustomerDashboard() {
           </div>
         </section>
       </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .animate-marquee {
+          display: inline-block;
+          animation: marquee 15s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
