@@ -219,7 +219,7 @@ export default function AuthPage() {
                         : 'border-gray-300 hover:border-gray-400'
                     }`}
                   >
-                    <div className="font-semibold">Customer</div>
+                    <div className="font-semibold text-sm sm:text-base">Customer</div>
                     <div className="text-xs text-gray-500">Need repair</div>
                   </button>
                   <button
@@ -231,7 +231,7 @@ export default function AuthPage() {
                         : 'border-gray-300 hover:border-gray-400'
                     }`}
                   >
-                    <div className="font-semibold">Engineer</div>
+                    <div className="font-semibold text-sm sm:text-base">Engineer</div>
                     <div className="text-xs text-gray-500">Provide service</div>
                   </button>
                   <button
@@ -243,7 +243,7 @@ export default function AuthPage() {
                         : 'border-gray-300 hover:border-gray-400'
                     }`}
                   >
-                    <div className="font-semibold">Rider</div>
+                    <div className="font-semibold text-sm sm:text-base">Rider</div>
                     <div className="text-xs text-gray-500">Deliver devices</div>
                   </button>
                 </div>
