@@ -285,7 +285,7 @@ export default function ActiveDeliveries() {
       </div>
 
       {/* Queue View */}
-      <div className="pt-14 px-4 pb-6 space-y-4">
+      <div className="pt-20 px-4 pb-6 space-y-4">
         {deliveries.length === 0 ? (
           // Empty State
           <div className="flex flex-col items-center justify-center py-16 px-6">

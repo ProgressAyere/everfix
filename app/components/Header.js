@@ -79,7 +79,7 @@ export default function Header() {
     { label: 'Verification', href: '/verificationE' },
     { label: 'Tracking', href: '/tracking' },
     { label: 'Support', href: '/support' },
-    { label: 'Your Ratings', href: '/profileE' }
+    { label: 'Your Ratings', href: '/rateE' }
   ];
 
   const riderMenuItems = [

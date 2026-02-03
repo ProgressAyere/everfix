@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
+import { Phone, MessageSquare } from 'lucide-react';
 
 const mockReviews = [
   { id: 1, customer: 'Chioma A.', rating: 5, comment: 'Excellent work! My iPhone screen looks brand new. Very professional and quick service.', date: '2 days ago', device: 'iPhone 14 Pro' },
@@ -253,11 +254,13 @@ export default function EngineerProfile() {
             {/* Contact */}
             <div className="bg-white rounded-xl shadow-sm p-6">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Contact</h2>
-              <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-3">
-                📞 Call Engineer
+              <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition mb-3 flex items-center justify-center gap-2">
+                <Phone size={20} />
+                Call Engineer
               </button>
-              <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition">
-                💬 Send Message
+              <button className="w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-200 transition flex items-center justify-center gap-2">
+                <MessageSquare size={20} />
+                Send Message
               </button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { CheckCircle, AlertTriangle, Clock, ShieldCheck } from 'lucide-react';
 
 const mockJobs = [
   { id: 'ORD-2024-001', device: 'iPhone 14 Pro', problem: 'Screen Replacement', customer: 'Chioma A.', location: 'Ikeja, Lagos', status: 'Picked Up', priority: 'High', estimatedTime: '2 hours', pickupTime: '10:30 AM' },
@@ -27,11 +28,11 @@ export default function EngineerDashboard() {
   const getVerificationBadge = () => {
     switch(verificationStatus) {
       case 'verified':
-        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">✓ Verified</span>;
+        return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1"><CheckCircle size={16} /> Verified</span>;
       case 'pending':
-        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">⏳ Pending</span>;
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><Clock size={16} className="text-yellow-600" /> Pending</span>;
       default:
-        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold">⚠ Unverified</span>;
+        return <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-red-600" /> Unverified</span>;
     }
   };
 
@@ -86,16 +87,24 @@ export default function EngineerDashboard() {
           </div>
           <div className="flex items-center gap-3">
             {getVerificationBadge()}
-            {verificationStatus !== 'verified' && (
-              <Link
-                href="/verification"
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-              >
-                Verify to Work as Engineer
-              </Link>
-            )}
           </div>
         </div>
+
+        {/* Verification Alert Banner */}
+        {verificationStatus !== 'verified' && (
+          <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-hidden">
+            <Link href="/verificationE" className="block">
+              <div className="flex items-center gap-3">
+                <ShieldCheck size={24} className="text-blue-600 flex-shrink-0" />
+                <div className="flex-1 overflow-hidden">
+                  <div className="animate-marquee whitespace-nowrap text-blue-700 font-medium">
+                    Verify Identity to secure account now • Verify Identity to secure account now • Verify Identity to secure account now • Verify Identity to secure account now
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
+        )}
 
         {/* Stats Overview */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -228,6 +237,21 @@ export default function EngineerDashboard() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        @keyframes marquee {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .animate-marquee {
+          display: inline-block;
+          animation: marquee 15s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }

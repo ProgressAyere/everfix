@@ -54,7 +54,7 @@ export default function NavigationPage() {
   };
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden bg-gray-100">
+    <div className="h-screen w-screen relative overflow-hidden bg-gray-100 mt-[75]">
       
       {/* Map Placeholder */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-100 to-green-100">
