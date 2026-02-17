@@ -134,17 +134,17 @@ export default function Home() {
           </p>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <img src="/certifiedprofessionals.png" alt="Certified Professionals" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover" />
               <h3 className="text-lg font-semibold text-center mb-2">Certified Professionals</h3>
               <p className="text-gray-600 text-center text-sm">All engineers are verified with valid certifications and experience.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <img src="/backgroundchecked.png" alt="Background Checked" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover" />
               <h3 className="text-lg font-semibold text-center mb-2">Background Checked</h3>
               <p className="text-gray-600 text-center text-sm">Every engineer undergoes thorough background verification for your safety.</p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm">
-              <div className="w-20 h-20 bg-gray-200 rounded-full mx-auto mb-4"></div>
+              <img src="/customerrated.png" alt="Customer Rated" className="w-20 h-20 rounded-full mx-auto mb-4 object-cover" />
               <h3 className="text-lg font-semibold text-center mb-2">Customer Rated</h3>
               <p className="text-gray-600 text-center text-sm">Real reviews from real customers help you choose the best engineer.</p>
             </div>
