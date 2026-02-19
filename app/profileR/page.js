@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 const riderData = {
   name: 'Adebayo Okonkwo',
-  riderId: 'RDR-2024-001',
+  riderId: 'RDR-2024-0001',
   rating: 4.8,
   verificationStatus: 'verified',
   phone: '+234 704 949 0588',

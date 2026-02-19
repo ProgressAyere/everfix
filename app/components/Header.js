@@ -43,16 +43,32 @@ export default function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    try {
+      // Call backend signout API
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signout`, {
+        method: 'POST',
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Signout error:', error);
+    }
+    
+    // Clear local storage
     localStorage.removeItem('userLoggedIn');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
+    localStorage.removeItem('userEmail');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('riderOnlineStatus');
+    
     setIsLoggedIn(false);
     setUserRole('customer');
     setUserName('User');
     setIsOnline(false);
     setIsProfileOpen(false);
+    
     window.location.href = '/';
   };
 

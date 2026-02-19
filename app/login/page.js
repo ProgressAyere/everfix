@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -68,29 +69,65 @@ export default function AuthPage() {
 
     setIsSubmitting(true);
     
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/signin';
+      const payload = isSignUp 
+        ? { email: formData.email, password: formData.password, fullName: formData.name, role: formData.role }
+        : { email: formData.email, password: formData.password };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.errors) {
+          const apiErrors = {};
+          data.errors.forEach(err => {
+            apiErrors[err.field] = err.message;
+          });
+          setErrors(apiErrors);
+        } else {
+          setErrors({ general: data.message || 'Authentication failed' });
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Success - store user data
       localStorage.setItem('userLoggedIn', 'true');
-      localStorage.setItem('userRole', isSignUp ? formData.role : 'customer');
-      localStorage.setItem('userName', isSignUp ? formData.name : formData.email.split('@')[0]);
+      localStorage.setItem('accessToken', data.data.accessToken);
+      localStorage.setItem('userRole', data.data.user.role);
+      localStorage.setItem('userName', data.data.user.fullName);
+      localStorage.setItem('userEmail', data.data.user.email);
+      localStorage.setItem('userId', data.data.user.id);
       window.dispatchEvent(new Event('storage'));
       
       const redirectPath = localStorage.getItem('redirectAfterLogin');
       if (redirectPath) {
         localStorage.removeItem('redirectAfterLogin');
         router.push(redirectPath);
-      } else if (isSignUp) {
-        if (formData.role === 'customer') {
-          router.push('/dashboardC');
-        } else if (formData.role === 'engineer') {
-          router.push('/dashboardE');
-        } else if (formData.role === 'rider') {
-          router.push('/dashboardR');
-        }
       } else {
-        router.push('/dashboardC');
+        const role = data.data.user.role;
+        if (role === 'customer') {
+          router.push('/dashboardC');
+        } else if (role === 'engineer') {
+          router.push('/dashboardE');
+        } else if (role === 'rider') {
+          router.push('/dashboardR');
+        } else {
+          router.push('/dashboardC');
+        }
       }
-    }, 1000);
+    } catch (error) {
+      console.error('Auth error:', error);
+      setErrors({ general: 'Network error. Please check if backend is running.' });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -253,11 +290,16 @@ export default function AuthPage() {
             {/* Forgot Password (Login Only) */}
             {!isSignUp && (
               <div className="text-right">
-                <a href="#" className="text-sm text-blue-600 hover:underline">Forgot password?</a>
+                <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">Forgot password?</Link>
               </div>
             )}
 
             {/* Submit Button */}
+            {errors.general && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p className="text-red-600 text-sm">{errors.general}</p>
+              </div>
+            )}
             <button
               type="submit"
               disabled={isSubmitting}

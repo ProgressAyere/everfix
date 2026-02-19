@@ -15,11 +15,29 @@ Phone Fix eliminates the hassle of traveling to repair shops by bringing profess
 
 ## 🚀 Technology Stack
 
+### Frontend
 - **Framework**: Next.js 16.1.1
 - **UI Library**: React 19.2.3
 - **Styling**: Tailwind CSS 3.4.19
+- **Icons**: Lucide React
 - **Language**: JavaScript (ES6+)
 - **Deployment**: Vercel (recommended)
+
+### Backend (See `/backend` folder)
+- **Runtime**: Node.js 18+ with Express.js
+- **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **Cache**: Redis
+- **Authentication**: JWT with bcrypt
+- **Face Verification**: AWS Rekognition
+- **File Storage**: AWS S3
+- **Payment**: Paystack/Flutterwave
+- **SMS/OTP**: Termii/Twilio
+- **Email**: SendGrid/AWS SES
+- **Real-time**: Socket.io
+- **Job Queue**: Bull
+
+For detailed backend documentation, see [backend/README.md](./backend/README.md)
 
 ## 📁 Project Structure
 

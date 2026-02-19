@@ -177,21 +177,6 @@ export default function CustomerDashboard() {
           </div>
         </section>
       </div>
-
-      <style jsx>{`
-        @keyframes marquee {
-          0% {
-            transform: translateX(100%);
-          }
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        .animate-marquee {
-          display: inline-block;
-          animation: marquee 15s linear infinite;
-        }
-      `}</style>
     </div>
   );
 }
