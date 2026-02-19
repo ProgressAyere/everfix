@@ -15,6 +15,7 @@ export default function EngineerProfile() {
   const [showAllReviews, setShowAllReviews] = useState(false);
 
   const profileData = {
+    id: 'ENG-2024-0789',
     name: 'Chukwudi Okafor',
     specialization: 'iPhone & MacBook Specialist',
     bio: 'Certified phone and laptop repair technician with 5+ years of experience. Specialized in Apple products, screen replacements, and motherboard repairs. Committed to quality service and customer satisfaction.',
@@ -76,6 +77,7 @@ export default function EngineerProfile() {
                   <div className="flex items-start justify-between mb-2">
                     <div>
                       <h1 className="text-3xl font-bold text-gray-900">{profileData.name}</h1>
+                      <p className="text-sm text-gray-500 mt-1">ID: {profileData.id}</p>
                       <p className="text-lg text-blue-600 font-medium mt-1">{profileData.specialization}</p>
                     </div>
                   </div>
