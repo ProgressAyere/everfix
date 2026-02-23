@@ -40,7 +40,9 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Phone Fix</h3>
+            <Link href="/">
+              <img src="/phonefix1-logo-zoomed.png" alt="Phone Fix" className="h-10 mb-4" />
+            </Link>
             <p className="text-gray-400 mb-4">Your trusted phone repair service with doorstep pickup and delivery across Nigeria.</p>
           </div>
 

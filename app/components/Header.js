@@ -115,8 +115,8 @@ export default function Header() {
     <header className="bg-white shadow-sm fixed w-full top-0 z-50">
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link href="/" className="text-2xl font-bold text-blue-600">
-            Phone Fix
+          <Link href="/">
+            <img src="/phonefix2-logo-zoomed.png" alt="Phone Fix" className="h-10" />
           </Link>
 
           {/* Desktop Navigation */}
