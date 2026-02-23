@@ -8,7 +8,7 @@ const getNextUserNumber = async (role) => {
   const { data, error } = await supabase
     .from('users')
     .select('id')
-    .like('id', pattern)
+    .ilike('id', pattern)
     .order('id', { ascending: false })
     .limit(1);
   
@@ -125,6 +125,14 @@ const incrementLoginAttempts = async (email, userId = null, ipAddress = null) =>
 };
 
 const resetLoginAttempts = async (email, userId = null, ipAddress = null) => {
+  // Delete failed attempts
+  await supabase
+    .from('login_attempts')
+    .delete()
+    .eq('email', email.toLowerCase())
+    .eq('successful', false);
+  
+  // Insert successful login record
   const { error } = await supabase
     .from('login_attempts')
     .insert([{ email: email.toLowerCase(), user_id: userId, ip_address: ipAddress, successful: true }]);
