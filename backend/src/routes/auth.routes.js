@@ -5,7 +5,9 @@ const {
   signIn,
   signOut,
   refreshAccessToken,
-  signOutAll
+  signOutAll,
+  forgotPassword,
+  resetPassword
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 
@@ -14,6 +16,8 @@ router.post('/signup', signUp);
 router.post('/signin', signIn);
 router.post('/signout', signOut);
 router.post('/refresh', refreshAccessToken);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 // Protected routes
 router.post('/signout-all', authenticate, signOutAll);

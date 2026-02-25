@@ -15,6 +15,7 @@ const {
   isAccountLocked,
   getNextUserNumber
 } = require('../utils/storage.util');
+const supabase = require('../config/supabase');
 
 const generateUserId = (role, number) => {
   const prefix = role === 'customer' ? 'CUST' : role === 'engineer' ? 'ENG' : 'RDR';
@@ -315,10 +316,118 @@ const signOutAll = async (req, res) => {
   }
 };
 
+// Forgot Password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    console.log('Forgot password request for:', email);
+
+    // Check if user exists in our database
+    const user = await findUserByEmail(email);
+    if (!user) {
+      console.log('User not found in database:', email);
+      // Return success even if user doesn't exist (security best practice)
+      return res.status(200).json({
+        success: true,
+        message: 'If an account exists with this email, you will receive password reset instructions'
+      });
+    }
+
+    console.log('User found, attempting to send reset email via Supabase...');
+
+    // Send password reset email using Supabase Auth
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.FRONTEND_URL}/reset-password`
+    });
+
+    if (error) {
+      console.error('Supabase reset password error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send reset email: ' + error.message
+      });
+    }
+
+    console.log('Reset email sent successfully via Supabase');
+    console.log('Response data:', data);
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset instructions sent to your email'
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Reset Password
+const resetPassword = async (req, res) => {
+  try {
+    const { password, token } = req.body;
+
+    if (!password || !token) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password and token are required'
+      });
+    }
+
+    // Verify token and update password using Supabase
+    const { data, error } = await supabase.auth.updateUser({
+      password: password
+    });
+
+    if (error) {
+      console.error('Supabase update password error:', error);
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token'
+      });
+    }
+
+    // Hash the new password and update in our database
+    const hashedPassword = await hashPassword(password);
+    const user = await findUserByEmail(data.user.email);
+    
+    if (user) {
+      await supabase
+        .from('users')
+        .update({ password: hashedPassword, updated_at: new Date() })
+        .eq('email', data.user.email);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Password reset successfully'
+    });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
   signOut,
   refreshAccessToken,
-  signOutAll
+  signOutAll,
+  forgotPassword,
+  resetPassword
 };
