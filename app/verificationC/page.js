@@ -1,15 +1,16 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserCircle, Smartphone, MapPin, Users, Lock, Camera } from 'lucide-react';
+import { UserCircle, Smartphone, MapPin, Users, Lock, Camera, Shield, PartyPopper } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function CustomerVerificationPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
-    profilePhoto: null,
-    profilePhotoPreview: null,
+    livePhoto: null,
+    livePhotoPreview: null,
     identityCardType: '',
     ninFront: null,
     ninFrontPreview: null,
@@ -50,6 +51,23 @@ export default function CustomerVerificationPage() {
   const [errors, setErrors] = useState({});
   const [otpSent, setOtpSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
+  const [stream, setStream] = useState(null);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    const accessToken = localStorage.getItem('accessToken');
+    
+    if (userData.email) {
+      setFormData(prev => ({ ...prev, email: userData.email }));
+    } else if (accessToken) {
+      // Try to get email from token or other storage
+      const userEmail = localStorage.getItem('userEmail');
+      if (userEmail) {
+        setFormData(prev => ({ ...prev, email: userEmail }));
+      }
+    }
+  }, []);
 
   const steps = [
     { id: 1, title: 'Basic Identity', icon: UserCircle, required: true },
@@ -60,7 +78,45 @@ export default function CustomerVerificationPage() {
     { id: 6, title: 'Security & Consent', icon: Lock, required: true }
   ];
 
-  const nigerianStates = ['Lagos', 'Abuja', 'Kano', 'Rivers', 'Oyo', 'Kaduna', 'Ogun', 'Anambra'];
+  const nigerianStates = {
+    'Abia': ['Aba North', 'Aba South', 'Arochukwu', 'Bende', 'Ikwuano', 'Isiala Ngwa North', 'Isiala Ngwa South', 'Isuikwuato', 'Obi Ngwa', 'Ohafia', 'Osisioma', 'Ugwunagbo', 'Ukwa East', 'Ukwa West', 'Umuahia North', 'Umuahia South', 'Umu Nneochi'],
+    'Adamawa': ['Demsa', 'Fufure', 'Ganye', 'Gayuk', 'Gombi', 'Grie', 'Hong', 'Jada', 'Larmurde', 'Madagali', 'Maiha', 'Mayo Belwa', 'Michika', 'Mubi North', 'Mubi South', 'Numan', 'Shelleng', 'Song', 'Toungo', 'Yola North', 'Yola South'],
+    'Akwa Ibom': ['Abak', 'Eastern Obolo', 'Eket', 'Esit Eket', 'Essien Udim', 'Etim Ekpo', 'Etinan', 'Ibeno', 'Ibesikpo Asutan', 'Ibiono-Ibom', 'Ika', 'Ikono', 'Ikot Abasi', 'Ikot Ekpene', 'Ini', 'Itu', 'Mbo', 'Mkpat-Enin', 'Nsit-Atai', 'Nsit-Ibom', 'Nsit-Ubium', 'Obot Akara', 'Okobo', 'Onna', 'Oron', 'Oruk Anam', 'Udung-Uko', 'Ukanafun', 'Uruan', 'Urue-Offong/Oruko', 'Uyo'],
+    'Anambra': ['Aguata', 'Anambra East', 'Anambra West', 'Anaocha', 'Awka North', 'Awka South', 'Ayamelum', 'Dunukofia', 'Ekwusigo', 'Idemili North', 'Idemili South', 'Ihiala', 'Njikoka', 'Nnewi North', 'Nnewi South', 'Ogbaru', 'Onitsha North', 'Onitsha South', 'Orumba North', 'Orumba South', 'Oyi'],
+    'Bauchi': ['Alkaleri', 'Bauchi', 'Bogoro', 'Damban', 'Darazo', 'Dass', 'Gamawa', 'Ganjuwa', 'Giade', 'Itas/Gadau', 'Jama\'are', 'Katagum', 'Kirfi', 'Misau', 'Ningi', 'Shira', 'Tafawa Balewa', 'Toro', 'Warji', 'Zaki'],
+    'Bayelsa': ['Brass', 'Ekeremor', 'Kolokuma/Opokuma', 'Nembe', 'Ogbia', 'Sagbama', 'Southern Ijaw', 'Yenagoa'],
+    'Benue': ['Ado', 'Agatu', 'Apa', 'Buruku', 'Gboko', 'Guma', 'Gwer East', 'Gwer West', 'Katsina-Ala', 'Konshisha', 'Kwande', 'Logo', 'Makurdi', 'Obi', 'Ogbadibo', 'Ohimini', 'Oju', 'Okpokwu', 'Oturkpo', 'Tarka', 'Ukum', 'Ushongo', 'Vandeikya'],
+    'Borno': ['Abadam', 'Askira/Uba', 'Bama', 'Bayo', 'Biu', 'Chibok', 'Damboa', 'Dikwa', 'Gubio', 'Guzamala', 'Gwoza', 'Hawul', 'Jere', 'Kaga', 'Kala/Balge', 'Konduga', 'Kukawa', 'Kwaya Kusar', 'Mafa', 'Magumeri', 'Maiduguri', 'Marte', 'Mobbar', 'Monguno', 'Ngala', 'Nganzai', 'Shani'],
+    'Cross River': ['Abi', 'Akamkpa', 'Akpabuyo', 'Bakassi', 'Bekwarra', 'Biase', 'Boki', 'Calabar Municipal', 'Calabar South', 'Etung', 'Ikom', 'Obanliku', 'Obubra', 'Obudu', 'Odukpani', 'Ogoja', 'Yakuur', 'Yala'],
+    'Delta': ['Aniocha North', 'Aniocha South', 'Bomadi', 'Burutu', 'Ethiope East', 'Ethiope West', 'Ika North East', 'Ika South', 'Isoko North', 'Isoko South', 'Ndokwa East', 'Ndokwa West', 'Okpe', 'Oshimili North', 'Oshimili South', 'Patani', 'Sapele', 'Udu', 'Ughelli North', 'Ughelli South', 'Ukwuani', 'Uvwie', 'Warri North', 'Warri South', 'Warri South West'],
+    'Ebonyi': ['Abakaliki', 'Afikpo North', 'Afikpo South', 'Ebonyi', 'Ezza North', 'Ezza South', 'Ikwo', 'Ishielu', 'Ivo', 'Izzi', 'Ohaozara', 'Ohaukwu', 'Onicha'],
+    'Edo': ['Akoko-Edo', 'Egor', 'Esan Central', 'Esan North-East', 'Esan South-East', 'Esan West', 'Etsako Central', 'Etsako East', 'Etsako West', 'Igueben', 'Ikpoba Okha', 'Orhionmwon', 'Oredo', 'Ovia North-East', 'Ovia South-West', 'Owan East', 'Owan West', 'Uhunmwonde'],
+    'Ekiti': ['Ado Ekiti', 'Efon', 'Ekiti East', 'Ekiti South-West', 'Ekiti West', 'Emure', 'Gbonyin', 'Ido Osi', 'Ijero', 'Ikere', 'Ikole', 'Ilejemeje', 'Irepodun/Ifelodun', 'Ise/Orun', 'Moba', 'Oye'],
+    'Enugu': ['Aninri', 'Awgu', 'Enugu East', 'Enugu North', 'Enugu South', 'Ezeagu', 'Igbo Etiti', 'Igbo Eze North', 'Igbo Eze South', 'Isi Uzo', 'Nkanu East', 'Nkanu West', 'Nsukka', 'Oji River', 'Udenu', 'Udi', 'Uzo Uwani'],
+    'FCT': ['Abaji', 'Bwari', 'Gwagwalada', 'Kuje', 'Kwali', 'Municipal Area Council'],
+    'Gombe': ['Akko', 'Balanga', 'Billiri', 'Dukku', 'Funakaye', 'Gombe', 'Kaltungo', 'Kwami', 'Nafada', 'Shongom', 'Yamaltu/Deba'],
+    'Imo': ['Aboh Mbaise', 'Ahiazu Mbaise', 'Ehime Mbano', 'Ezinihitte', 'Ideato North', 'Ideato South', 'Ihitte/Uboma', 'Ikeduru', 'Isiala Mbano', 'Isu', 'Mbaitoli', 'Ngor Okpala', 'Njaba', 'Nkwerre', 'Nwangele', 'Obowo', 'Oguta', 'Ohaji/Egbema', 'Okigwe', 'Orlu', 'Orsu', 'Oru East', 'Oru West', 'Owerri Municipal', 'Owerri North', 'Owerri West', 'Unuimo'],
+    'Jigawa': ['Auyo', 'Babura', 'Biriniwa', 'Birnin Kudu', 'Buji', 'Dutse', 'Gagarawa', 'Garki', 'Gumel', 'Guri', 'Gwaram', 'Gwiwa', 'Hadejia', 'Jahun', 'Kafin Hausa', 'Kazaure', 'Kiri Kasama', 'Kiyawa', 'Kaugama', 'Maigatari', 'Malam Madori', 'Miga', 'Ringim', 'Roni', 'Sule Tankarkar', 'Taura', 'Yankwashi'],
+    'Kaduna': ['Birnin Gwari', 'Chikun', 'Giwa', 'Igabi', 'Ikara', 'Jaba', 'Jema\'a', 'Kachia', 'Kaduna North', 'Kaduna South', 'Kagarko', 'Kajuru', 'Kaura', 'Kauru', 'Kubau', 'Kudan', 'Lere', 'Makarfi', 'Sabon Gari', 'Sanga', 'Soba', 'Zangon Kataf', 'Zaria'],
+    'Kano': ['Ajingi', 'Albasu', 'Bagwai', 'Bebeji', 'Bichi', 'Bunkure', 'Dala', 'Dambatta', 'Dawakin Kudu', 'Dawakin Tofa', 'Doguwa', 'Fagge', 'Gabasawa', 'Garko', 'Garun Mallam', 'Gaya', 'Gezawa', 'Gwale', 'Gwarzo', 'Kabo', 'Kano Municipal', 'Karaye', 'Kibiya', 'Kiru', 'Kumbotso', 'Kunchi', 'Kura', 'Madobi', 'Makoda', 'Minjibir', 'Nasarawa', 'Rano', 'Rimin Gado', 'Rogo', 'Shanono', 'Sumaila', 'Takai', 'Tarauni', 'Tofa', 'Tsanyawa', 'Tudun Wada', 'Ungogo', 'Warawa', 'Wudil'],
+    'Katsina': ['Bakori', 'Batagarawa', 'Batsari', 'Baure', 'Bindawa', 'Charanchi', 'Dandume', 'Danja', 'Dan Musa', 'Daura', 'Dutsi', 'Dutsin Ma', 'Faskari', 'Funtua', 'Ingawa', 'Jibia', 'Kafur', 'Kaita', 'Kankara', 'Kankia', 'Katsina', 'Kurfi', 'Kusada', 'Mai\'Adua', 'Malumfashi', 'Mani', 'Mashi', 'Matazu', 'Musawa', 'Rimi', 'Sabuwa', 'Safana', 'Sandamu', 'Zango'],
+    'Kebbi': ['Aleiro', 'Arewa Dandi', 'Argungu', 'Augie', 'Bagudo', 'Birnin Kebbi', 'Bunza', 'Dandi', 'Fakai', 'Gwandu', 'Jega', 'Kalgo', 'Koko/Besse', 'Maiyama', 'Ngaski', 'Sakaba', 'Shanga', 'Suru', 'Wasagu/Danko', 'Yauri', 'Zuru'],
+    'Kogi': ['Adavi', 'Ajaokuta', 'Ankpa', 'Bassa', 'Dekina', 'Ibaji', 'Idah', 'Igalamela Odolu', 'Ijumu', 'Kabba/Bunu', 'Kogi', 'Lokoja', 'Mopa Muro', 'Ofu', 'Ogori/Magongo', 'Okehi', 'Okene', 'Olamaboro', 'Omala', 'Yagba East', 'Yagba West'],
+    'Kwara': ['Asa', 'Baruten', 'Edu', 'Ekiti', 'Ifelodun', 'Ilorin East', 'Ilorin South', 'Ilorin West', 'Irepodun', 'Isin', 'Kaiama', 'Moro', 'Offa', 'Oke Ero', 'Oyun', 'Pategi'],
+    'Lagos': ['Agege', 'Ajeromi-Ifelodun', 'Alimosho', 'Amuwo-Odofin', 'Apapa', 'Badagry', 'Epe', 'Eti Osa', 'Ibeju-Lekki', 'Ifako-Ijaiye', 'Ikeja', 'Ikorodu', 'Kosofe', 'Lagos Island', 'Lagos Mainland', 'Mushin', 'Ojo', 'Oshodi-Isolo', 'Shomolu', 'Surulere'],
+    'Nasarawa': ['Akwanga', 'Awe', 'Doma', 'Karu', 'Keana', 'Keffi', 'Kokona', 'Lafia', 'Nasarawa', 'Nasarawa Egon', 'Obi', 'Toto', 'Wamba'],
+    'Niger': ['Agaie', 'Agwara', 'Bida', 'Borgu', 'Bosso', 'Chanchaga', 'Edati', 'Gbako', 'Gurara', 'Katcha', 'Kontagora', 'Lapai', 'Lavun', 'Magama', 'Mariga', 'Mashegu', 'Mokwa', 'Moya', 'Paikoro', 'Rafi', 'Rijau', 'Shiroro', 'Suleja', 'Tafa', 'Wushishi'],
+    'Ogun': ['Abeokuta North', 'Abeokuta South', 'Ado-Odo/Ota', 'Egbado North', 'Egbado South', 'Ewekoro', 'Ifo', 'Ijebu East', 'Ijebu North', 'Ijebu North East', 'Ijebu Ode', 'Ikenne', 'Imeko Afon', 'Ipokia', 'Obafemi Owode', 'Odeda', 'Odogbolu', 'Ogun Waterside', 'Remo North', 'Shagamu'],
+    'Ondo': ['Akoko North-East', 'Akoko North-West', 'Akoko South-West', 'Akoko South-East', 'Akure North', 'Akure South', 'Ese Odo', 'Idanre', 'Ifedore', 'Ilaje', 'Ile Oluji/Okeigbo', 'Irele', 'Odigbo', 'Okitipupa', 'Ondo East', 'Ondo West', 'Ose', 'Owo'],
+    'Osun': ['Atakunmosa East', 'Atakunmosa West', 'Aiyedaade', 'Aiyedire', 'Boluwaduro', 'Boripe', 'Ede North', 'Ede South', 'Ife Central', 'Ife East', 'Ife North', 'Ife South', 'Egbedore', 'Ejigbo', 'Ifedayo', 'Ifelodun', 'Ila', 'Ilesa East', 'Ilesa West', 'Irepodun', 'Irewole', 'Isokan', 'Iwo', 'Obokun', 'Odo Otin', 'Ola Oluwa', 'Olorunda', 'Oriade', 'Orolu', 'Osogbo'],
+    'Oyo': ['Afijio', 'Akinyele', 'Atiba', 'Atisbo', 'Egbeda', 'Ibadan North', 'Ibadan North-East', 'Ibadan North-West', 'Ibadan South-East', 'Ibadan South-West', 'Ibarapa Central', 'Ibarapa East', 'Ibarapa North', 'Ido', 'Irepo', 'Iseyin', 'Itesiwaju', 'Iwajowa', 'Kajola', 'Lagelu', 'Ogbomosho North', 'Ogbomosho South', 'Ogo Oluwa', 'Olorunsogo', 'Oluyole', 'Ona Ara', 'Orelope', 'Ori Ire', 'Oyo East', 'Oyo West', 'Saki East', 'Saki West', 'Surulere'],
+    'Plateau': ['Barkin Ladi', 'Bassa', 'Bokkos', 'Jos East', 'Jos North', 'Jos South', 'Kanam', 'Kanke', 'Langtang North', 'Langtang South', 'Mangu', 'Mikang', 'Pankshin', 'Qua\'an Pan', 'Riyom', 'Shendam', 'Wase'],
+    'Rivers': ['Abua/Odual', 'Ahoada East', 'Ahoada West', 'Akuku-Toru', 'Andoni', 'Asari-Toru', 'Bonny', 'Degema', 'Eleme', 'Emohua', 'Etche', 'Gokana', 'Ikwerre', 'Khana', 'Obio/Akpor', 'Ogba/Egbema/Ndoni', 'Ogu/Bolo', 'Okrika', 'Omuma', 'Opobo/Nkoro', 'Oyigbo', 'Port Harcourt', 'Tai'],
+    'Sokoto': ['Binji', 'Bodinga', 'Dange Shuni', 'Gada', 'Goronyo', 'Gudu', 'Gwadabawa', 'Illela', 'Isa', 'Kebbe', 'Kware', 'Rabah', 'Sabon Birni', 'Shagari', 'Silame', 'Sokoto North', 'Sokoto South', 'Tambuwal', 'Tangaza', 'Tureta', 'Wamako', 'Wurno', 'Yabo'],
+    'Taraba': ['Ardo Kola', 'Bali', 'Donga', 'Gashaka', 'Gassol', 'Ibi', 'Jalingo', 'Karim Lamido', 'Kumi', 'Lau', 'Sardauna', 'Takum', 'Ussa', 'Wukari', 'Yorro', 'Zing'],
+    'Yobe': ['Bade', 'Bursari', 'Damaturu', 'Fika', 'Fune', 'Geidam', 'Gujba', 'Gulani', 'Jakusko', 'Karasuwa', 'Machina', 'Nangere', 'Nguru', 'Potiskum', 'Tarmuwa', 'Yunusari', 'Yusufari'],
+    'Zamfara': ['Anka', 'Bakura', 'Birnin Magaji/Kiyaw', 'Bukkuyum', 'Bungudu', 'Gummi', 'Gusau', 'Kaura Namoda', 'Maradun', 'Maru', 'Shinkafi', 'Talata Mafara', 'Chafe', 'Zurmi']
+  };
 
   const handleFileChange = (e, fieldName, previewName) => {
     const file = e.target.files[0];
@@ -76,6 +132,49 @@ export default function CustomerVerificationPage() {
       reader.readAsDataURL(file);
     }
     setErrors({ ...errors, [fieldName]: '' });
+  };
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' }, 
+        audio: false 
+      });
+      setStream(mediaStream);
+      setShowCamera(true);
+      setTimeout(() => {
+        const video = document.getElementById('cameraVideo');
+        if (video) video.srcObject = mediaStream;
+      }, 100);
+    } catch (error) {
+      setErrors({ ...errors, livePhoto: 'Camera access denied' });
+    }
+  };
+
+  const capturePhoto = () => {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    
+    canvas.toBlob((blob) => {
+      const file = new File([blob], 'live-photo.jpg', { type: 'image/jpeg' });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, livePhoto: file, livePhotoPreview: reader.result });
+        stopCamera();
+      };
+      reader.readAsDataURL(file);
+    }, 'image/jpeg', 0.9);
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+    setShowCamera(false);
   };
 
   const validatePhone = (phone) => {
@@ -107,16 +206,30 @@ export default function CustomerVerificationPage() {
   };
 
   const handleNext = () => {
-    if (currentStep === 1 && (!formData.fullName || !formData.email)) {
-      setErrors({ ...errors, identity: 'Please complete all required fields' });
-      return;
+    if (currentStep === 1) {
+      if (!formData.fullName || !formData.email) {
+        setErrors({ ...errors, identity: 'Please complete all required fields' });
+        return;
+      }
+      if (!formData.livePhoto) {
+        setErrors({ ...errors, livePhoto: 'Live photo is required' });
+        return;
+      }
+      if (!formData.identityCardType) {
+        setErrors({ ...errors, identity: 'Please select an identity card type' });
+        return;
+      }
     }
-    if (currentStep === 2 && !formData.phoneVerified) {
-      setErrors({ ...errors, phone: 'Please verify your phone number' });
+    if (currentStep === 2 && !formData.phone) {
+      setErrors({ ...errors, phone: 'Please enter your phone number' });
       return;
     }
     if (currentStep === 3 && (!formData.address || !formData.state)) {
       setErrors({ ...errors, address: 'Please complete address details' });
+      return;
+    }
+    if (currentStep === 5 && (!formData.emergencyName || !formData.emergencyPhone || !formData.emergencyRelationship)) {
+      setErrors({ ...errors, emergency: 'Please complete all emergency contact fields' });
       return;
     }
     if (currentStep === 6 && (!formData.consentData || !formData.consentTerms)) {
@@ -137,12 +250,75 @@ export default function CustomerVerificationPage() {
     router.push('/dashboardC');
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      localStorage.setItem('customerVerificationStatus', 'verified');
+    try {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Upload images to Supabase Storage
+      const uploadImage = async (file, path) => {
+        if (!file) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userData.id || 'user'}_${path}_${Date.now()}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from('verification-documents')
+          .upload(fileName, file);
+        if (error) throw error;
+        return supabase.storage.from('verification-documents').getPublicUrl(fileName).data.publicUrl;
+      };
+
+      const livePhotoUrl = await uploadImage(formData.livePhoto, 'live_photo');
+      const ninFrontUrl = await uploadImage(formData.ninFront, 'nin_front');
+      const ninBackUrl = await uploadImage(formData.ninBack, 'nin_back');
+      const pvcFrontUrl = await uploadImage(formData.pvcFront, 'pvc_front');
+      const pvcBackUrl = await uploadImage(formData.pvcBack, 'pvc_back');
+      const passportFrontUrl = await uploadImage(formData.passportFront, 'passport_front');
+      const passportBackUrl = await uploadImage(formData.passportBack, 'passport_back');
+      const driverLicenseFrontUrl = await uploadImage(formData.driverLicenseFront, 'driver_license_front');
+      const driverLicenseBackUrl = await uploadImage(formData.driverLicenseBack, 'driver_license_back');
+
+      // Insert verification data
+      const { error } = await supabase
+        .from('customers_verification')
+        .insert({
+          user_id: userData.id,
+          full_name: formData.fullName,
+          email: formData.email,
+          live_photo_url: livePhotoUrl,
+          identity_card_type: formData.identityCardType,
+          nin_front_url: ninFrontUrl,
+          nin_back_url: ninBackUrl,
+          nin_number: formData.nin,
+          pvc_front_url: pvcFrontUrl,
+          pvc_back_url: pvcBackUrl,
+          passport_front_url: passportFrontUrl,
+          passport_back_url: passportBackUrl,
+          passport_number: formData.passportNumber,
+          driver_license_front_url: driverLicenseFrontUrl,
+          driver_license_back_url: driverLicenseBackUrl,
+          driver_license_number: formData.driverLicenseNumber,
+          phone: formData.phone,
+          address: formData.address,
+          state: formData.state,
+          lga: formData.lga,
+          landmark: formData.landmark,
+          device_brand: formData.deviceBrand,
+          device_model: formData.deviceModel,
+          emergency_name: formData.emergencyName,
+          emergency_phone: formData.emergencyPhone,
+          emergency_relationship: formData.emergencyRelationship,
+          verification_status: 'pending'
+        });
+
+      if (error) throw error;
+
+      localStorage.setItem('customerVerificationStatus', 'pending');
       router.push('/dashboardC');
-    }, 2000);
+    } catch (error) {
+      console.error('Verification submission error:', error);
+      setErrors({ ...errors, submit: 'Failed to submit verification. Please try again.' });
+      setIsSubmitting(false);
+    }
   };
 
   const getCompletionStatus = () => {
@@ -166,7 +342,10 @@ export default function CustomerVerificationPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify Your Account</h1>
           <p className="text-gray-600">Quick verification to ensure safe pickups and accurate deliveries</p>
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4 inline-block">
-            <p className="text-sm text-blue-800">🔒 Your information is encrypted and never shared without consent</p>
+            <p className="text-sm text-blue-800 flex items-center gap-2">
+              <Shield className="w-4 h-4" />
+              Your information is encrypted and never shared without consent
+            </p>
           </div>
         </div>
 
@@ -223,7 +402,7 @@ export default function CustomerVerificationPage() {
                   type="text"
                   value={formData.fullName}
                   onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  placeholder="Enter your full name"
+                  placeholder="Enter your full legal name"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -232,40 +411,68 @@ export default function CustomerVerificationPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
                 <input
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  placeholder="you@example.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={formData.email || ''}
+                  readOnly
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-900"
+                  style={{ WebkitTextFillColor: '#111827', opacity: 1 }}
                 />
-                <p className="text-sm text-gray-500 mt-1">We'll send order updates and receipts here</p>
+                <p className="text-sm text-gray-500 mt-1">Email from your account</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Profile Photo (Optional)</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, 'profilePhoto', 'profilePhotoPreview')}
-                    className="hidden"
-                    id="profilePhoto"
-                  />
-                  <label htmlFor="profilePhoto" className="cursor-pointer">
-                    {formData.profilePhotoPreview ? (
+                <label className="block text-sm font-medium text-gray-700 mb-2">Live Photo Verification *</label>
+                {!showCamera ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition">
+                    {formData.livePhotoPreview ? (
                       <div>
-                        <img src={formData.profilePhotoPreview} alt="Preview" className="w-24 h-24 object-cover rounded-full mx-auto mb-2" />
-                        <p className="text-sm text-gray-500">Click to change photo</p>
+                        <img src={formData.livePhotoPreview} alt="Preview" className="w-24 h-24 object-cover rounded-full mx-auto mb-2" />
+                        <button
+                          type="button"
+                          onClick={startCamera}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          Retake Photo
+                        </button>
                       </div>
                     ) : (
-                      <div>
+                      <button
+                        type="button"
+                        onClick={startCamera}
+                        className="w-full"
+                      >
                         <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-700">Click to upload photo (Max 1MB)</p>
-                        <p className="text-xs text-gray-500 mt-1">Helps engineers identify you during pickup</p>
-                      </div>
+                        <p className="text-sm text-gray-700">Take Live Photo</p>
+                        <p className="text-xs text-gray-500 mt-1">Camera will open to capture your photo</p>
+                      </button>
                     )}
-                  </label>
-                </div>
-                {errors.profilePhoto && <p className="text-red-500 text-sm mt-1">{errors.profilePhoto}</p>}
+                  </div>
+                ) : (
+                  <div className="border-2 border-gray-300 rounded-lg overflow-hidden">
+                    <video
+                      id="cameraVideo"
+                      autoPlay
+                      playsInline
+                      className="w-full h-64 object-cover bg-black"
+                    />
+                    <div className="flex gap-2 p-4 bg-gray-50">
+                      <button
+                        type="button"
+                        onClick={capturePhoto}
+                        className="flex-1 bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700"
+                      >
+                        Capture Photo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={stopCamera}
+                        className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-400"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {errors.livePhoto && <p className="text-red-500 text-sm mt-1">{errors.livePhoto}</p>}
               </div>
 
               <div>
@@ -532,8 +739,8 @@ export default function CustomerVerificationPage() {
             <div className="space-y-6">
               <div className="text-center mb-6">
                 <Smartphone className="w-16 h-16 mx-auto mb-3 text-blue-600" />
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Verification</h2>
-                <p className="text-gray-600">Verify your number so engineers can contact you for pickup coordination</p>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Phone Number</h2>
+                <p className="text-gray-600">Provide your phone number so engineers can contact you for pickup coordination</p>
               </div>
 
               <div>
@@ -549,46 +756,7 @@ export default function CustomerVerificationPage() {
                   }`}
                 />
                 {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-              </div>
-
-              {!otpSent ? (
-                <button
-                  onClick={handleSendOTP}
-                  disabled={isSubmitting}
-                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-                >
-                  {isSubmitting ? 'Sending OTP...' : 'Send Verification Code'}
-                </button>
-              ) : !formData.phoneVerified ? (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Enter 6-Digit Code</label>
-                  <input
-                    type="text"
-                    maxLength="6"
-                    value={formData.otp}
-                    onChange={(e) => setFormData({ ...formData, otp: e.target.value.replace(/\D/g, '') })}
-                    placeholder="123456"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
-                  />
-                  <button
-                    onClick={handleVerifyOTP}
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-                  >
-                    Verify Code
-                  </button>
-                  <div className="flex justify-between items-center mt-2">
-                    <p className="text-sm text-gray-500">Code sent to {formData.phone}</p>
-                    <button onClick={handleSendOTP} className="text-sm text-blue-600 hover:underline">Resend</button>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                  <p className="text-green-800 font-medium">✓ Phone number verified successfully!</p>
-                </div>
-              )}
-
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <p className="text-sm text-yellow-800">⏱️ Code may take 1-2 minutes. Check your messages</p>
+                <p className="text-sm text-gray-500 mt-1">Enter your Nigerian phone number</p>
               </div>
             </div>
           )}
@@ -618,24 +786,28 @@ export default function CustomerVerificationPage() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
                   <select
                     value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value, lga: '' })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select state</option>
-                    {nigerianStates.map(state => (
+                    {Object.keys(nigerianStates).map(state => (
                       <option key={state} value={state}>{state}</option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">LGA *</label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.lga}
                     onChange={(e) => setFormData({ ...formData, lga: e.target.value })}
-                    placeholder="Local Government Area"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                    disabled={!formData.state}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  >
+                    <option value="">Select LGA</option>
+                    {formData.state && nigerianStates[formData.state]?.map(lga => (
+                      <option key={lga} value={lga}>{lga}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -701,7 +873,7 @@ export default function CustomerVerificationPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Name *</label>
                 <input
                   type="text"
                   value={formData.emergencyName}
@@ -712,7 +884,7 @@ export default function CustomerVerificationPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contact Phone *</label>
                 <input
                   type="tel"
                   maxLength="11"
@@ -724,7 +896,7 @@ export default function CustomerVerificationPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Relationship</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Relationship *</label>
                 <select
                   value={formData.emergencyRelationship}
                   onChange={(e) => setFormData({ ...formData, emergencyRelationship: e.target.value })}
@@ -737,6 +909,7 @@ export default function CustomerVerificationPage() {
                   <option value="Neighbor">Neighbor</option>
                 </select>
               </div>
+              {errors.emergency && <p className="text-red-500 text-sm">{errors.emergency}</p>}
 
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <p className="text-sm text-gray-700">ℹ️ This contact is only used if we can't reach you</p>
@@ -781,7 +954,10 @@ export default function CustomerVerificationPage() {
               {errors.consent && <p className="text-red-500 text-sm">{errors.consent}</p>}
 
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <p className="text-sm text-green-800">🎉 You're all set! Complete verification to start requesting pickups</p>
+                <p className="text-sm text-green-800 flex items-center gap-2">
+                  <PartyPopper className="w-4 h-4" />
+                  You're all set! Complete verification to start requesting pickups
+                </p>
               </div>
             </div>
           )}
