@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -23,24 +24,22 @@ export default function ForgotPassword() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+      const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Failed to send reset email');
+      if (error) {
+        console.error('Reset password error:', error);
+        setError(error.message || 'Failed to send reset email');
         setIsSubmitting(false);
         return;
       }
 
+      console.log('Password reset email sent successfully');
       setIsSuccess(true);
     } catch (error) {
       console.error('Forgot password error:', error);
-      setError('Network error. Please check if backend is running.');
+      setError('Failed to send reset email. Please try again.');
       setIsSubmitting(false);
     }
   };

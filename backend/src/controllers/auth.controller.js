@@ -40,14 +40,33 @@ const signUp = async (req, res) => {
       });
     }
 
-    // Hash password
+    // Create user in Supabase Auth first
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: {
+        full_name: fullName,
+        role: role
+      }
+    });
+
+    if (authError) {
+      console.error('Supabase auth creation error:', authError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to create user account'
+      });
+    }
+
+    // Hash password for local storage
     const hashedPassword = await hashPassword(password);
 
     // Generate unique user ID
     const userNumber = await getNextUserNumber(role);
     const userId = generateUserId(role, userNumber);
 
-    // Create user
+    // Create user in local database
     const user = {
       id: userId,
       email,
