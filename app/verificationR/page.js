@@ -23,7 +23,27 @@ export default function RiderVerification() {
   const [currentStep, setCurrentStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
+    identityCardType: '',
     idUpload: null,
+    ninFront: null,
+    ninFrontPreview: null,
+    ninBack: null,
+    ninBackPreview: null,
+    nin: '',
+    pvcFront: null,
+    pvcFrontPreview: null,
+    pvcBack: null,
+    pvcBackPreview: null,
+    passportFront: null,
+    passportFrontPreview: null,
+    passportBack: null,
+    passportBackPreview: null,
+    passportNumber: '',
+    driverLicenseFront: null,
+    driverLicenseFrontPreview: null,
+    driverLicenseBack: null,
+    driverLicenseBackPreview: null,
+    driverLicenseNumber: '',
     facePhoto: null,
     fullName: '',
     dob: '',
@@ -54,8 +74,19 @@ export default function RiderVerification() {
     6: 'notStarted'
   });
 
-  const handleFileUpload = (field, file) => {
-    setFormData({ ...formData, [field]: file });
+  const handleFileUpload = (field, file, previewField) => {
+    if (file && file.size > 1048576) {
+      return;
+    }
+    if (previewField && file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, [field]: file, [previewField]: reader.result });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setFormData({ ...formData, [field]: file });
+    }
   };
 
   const handleNext = () => {
@@ -146,32 +177,120 @@ export default function RiderVerification() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Government ID Upload</label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition">
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileUpload('idUpload', e.target.files[0])}
-                      className="hidden"
-                      id="idUpload"
-                    />
-                    <label htmlFor="idUpload" className="cursor-pointer">
-                      {formData.idUpload ? (
-                        <div>
-                          <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-2" />
-                          <p className="text-sm font-semibold text-gray-900">{formData.idUpload.name}</p>
-                        </div>
-                      ) : (
-                        <div>
-                          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm font-semibold text-gray-900">Upload ID Card</p>
-                          <p className="text-xs text-gray-500 mt-1">NIN, Driver's License, or Passport (Max 5MB)</p>
-                        </div>
-                      )}
-                    </label>
-                  </div>
-                  <p className="text-xs text-gray-600 mt-2">📌 ID must be clear, unfolded, and show all four corners</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Identity Card Type</label>
+                  <select
+                    value={formData.identityCardType}
+                    onChange={(e) => setFormData({ ...formData, identityCardType: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Identity Card Type</option>
+                    <option value="NIN">NIN (National Identity Number)</option>
+                    <option value="PVC">PVC (Voter's Card)</option>
+                    <option value="PASSPORT">International Passport</option>
+                    <option value="DRIVER_LICENSE">Driver's License</option>
+                  </select>
                 </div>
+
+                {formData.identityCardType === 'NIN' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">NIN Front</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('ninFront', e.target.files[0], 'ninFrontPreview')} className="hidden" id="ninFront" />
+                          <label htmlFor="ninFront" className="cursor-pointer">
+                            {formData.ninFrontPreview ? <img src={formData.ninFrontPreview} alt="NIN" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">NIN Back</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('ninBack', e.target.files[0], 'ninBackPreview')} className="hidden" id="ninBack" />
+                          <label htmlFor="ninBack" className="cursor-pointer">
+                            {formData.ninBackPreview ? <img src={formData.ninBackPreview} alt="NIN" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <input type="text" maxLength="11" value={formData.nin} onChange={(e) => setFormData({ ...formData, nin: e.target.value.replace(/\D/g, '') })} placeholder="NIN Number (11 digits)" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                )}
+
+                {formData.identityCardType === 'PVC' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">PVC Front</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                        <input type="file" accept="image/*" onChange={(e) => handleFileUpload('pvcFront', e.target.files[0], 'pvcFrontPreview')} className="hidden" id="pvcFront" />
+                        <label htmlFor="pvcFront" className="cursor-pointer">
+                          {formData.pvcFrontPreview ? <img src={formData.pvcFrontPreview} alt="PVC" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                        </label>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-700 mb-2">PVC Back</label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                        <input type="file" accept="image/*" onChange={(e) => handleFileUpload('pvcBack', e.target.files[0], 'pvcBackPreview')} className="hidden" id="pvcBack" />
+                        <label htmlFor="pvcBack" className="cursor-pointer">
+                          {formData.pvcBackPreview ? <img src={formData.pvcBackPreview} alt="PVC" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {formData.identityCardType === 'PASSPORT' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">Passport Photo Page</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('passportFront', e.target.files[0], 'passportFrontPreview')} className="hidden" id="passportFront" />
+                          <label htmlFor="passportFront" className="cursor-pointer">
+                            {formData.passportFrontPreview ? <img src={formData.passportFrontPreview} alt="Passport" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">Passport Back Page</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('passportBack', e.target.files[0], 'passportBackPreview')} className="hidden" id="passportBack" />
+                          <label htmlFor="passportBack" className="cursor-pointer">
+                            {formData.passportBackPreview ? <img src={formData.passportBackPreview} alt="Passport" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <input type="text" value={formData.passportNumber} onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value.toUpperCase() })} placeholder="Passport Number" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                )}
+
+                {formData.identityCardType === 'DRIVER_LICENSE' && (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">License Front</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('driverLicenseFront', e.target.files[0], 'driverLicenseFrontPreview')} className="hidden" id="driverLicenseFront" />
+                          <label htmlFor="driverLicenseFront" className="cursor-pointer">
+                            {formData.driverLicenseFrontPreview ? <img src={formData.driverLicenseFrontPreview} alt="License" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-2">License Back</label>
+                        <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center">
+                          <input type="file" accept="image/*" onChange={(e) => handleFileUpload('driverLicenseBack', e.target.files[0], 'driverLicenseBackPreview')} className="hidden" id="driverLicenseBack" />
+                          <label htmlFor="driverLicenseBack" className="cursor-pointer">
+                            {formData.driverLicenseBackPreview ? <img src={formData.driverLicenseBackPreview} alt="License" className="w-full h-24 object-cover rounded" /> : <div><Upload className="w-8 h-8 text-gray-400 mx-auto mb-1" /><p className="text-xs text-gray-600">Upload (Max 1MB)</p></div>}
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    <input type="text" value={formData.driverLicenseNumber} onChange={(e) => setFormData({ ...formData, driverLicenseNumber: e.target.value.toUpperCase() })} placeholder="Driver's License Number" className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Live Facial Verification</label>
@@ -193,8 +312,7 @@ export default function RiderVerification() {
                       ) : (
                         <div>
                           <Camera className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                          <p className="text-sm font-semibold text-gray-900">Take Selfie</p>
-                          <p className="text-xs text-gray-500 mt-1">Face camera directly in good lighting</p>
+                          <p className="text-sm font-semibold text-gray-900">Take Selfie (Max 1MB)</p>
                         </div>
                       )}
                     </label>
@@ -240,7 +358,7 @@ export default function RiderVerification() {
 
             <button
               onClick={handleNext}
-              disabled={!formData.idUpload || !formData.facePhoto || !formData.fullName}
+              disabled={!formData.identityCardType || !formData.facePhoto || !formData.fullName}
               className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
             >
               Continue to Step 2
