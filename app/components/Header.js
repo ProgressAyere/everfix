@@ -81,10 +81,9 @@ export default function Header() {
   const customerMenuItems = [
     { label: 'Dashboard', href: '/dashboardC' },
     { label: 'Profile', href: '/profileC' },
-    { label: 'Account Settings', href: '/settingsPage' },
     { label: 'Verification', href: '/verificationC' },
-    { label: 'Tracking', href: '/tracking' },
-    { label: 'Support', href: '/support' },
+    { label: 'Tracking', href: '/trackingC' },
+    { label: 'Support', href: '/supportC' },
     { label: 'Rate an Engineer', href: '/rateC' }
   ];
 
@@ -93,7 +92,7 @@ export default function Header() {
     { label: 'Profile', href: '/profileE' },
     { label: 'Account Settings', href: '/settingsPage' },
     { label: 'Verification', href: '/verificationE' },
-    { label: 'Tracking', href: '/tracking' },
+    { label: 'Tracking', href: '/trackingE' },
     { label: 'Support', href: '/support' },
     { label: 'Your Ratings', href: '/rateE' }
   ];

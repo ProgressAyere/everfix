@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
 const faqs = [
   {
@@ -52,12 +53,28 @@ export default function SupportPage() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    setTimeout(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const { error } = await supabase
+        .from('support_messages')
+        .insert({
+          user_id: user.id || null,
+          name: formData.name,
+          email: formData.email,
+          category: formData.category,
+          message: formData.message
+        });
+      
+      if (!error) {
+        setSubmitted(true);
+        setFormData({ name: '', email: '', category: '', message: '' });
+        setTimeout(() => setSubmitted(false), 5000);
+      }
+    } catch (error) {
+      console.error('Error submitting support message:', error);
+    } finally {
       setIsSubmitting(false);
-      setSubmitted(true);
-      setFormData({ name: '', email: '', category: '', message: '' });
-      setTimeout(() => setSubmitted(false), 5000);
-    }, 1500);
+    }
   };
 
   return (
@@ -82,7 +99,7 @@ export default function SupportPage() {
             <p className="text-gray-600 text-sm mb-4">
               Check your tracking page for real-time updates. If delayed over 30 minutes, call your rider or our support line.
             </p>
-            <a href="/tracking" className="text-red-600 font-semibold text-sm hover:underline">
+            <a href="/trackingC" className="text-red-600 font-semibold text-sm hover:underline">
               Track Order →
             </a>
           </div>
@@ -97,7 +114,7 @@ export default function SupportPage() {
             <p className="text-gray-600 text-sm mb-4">
               View real-time repair progress, engineer details, and estimated completion time on your tracking page.
             </p>
-            <a href="/tracking" className="text-blue-600 font-semibold text-sm hover:underline">
+            <a href="/trackingC" className="text-blue-600 font-semibold text-sm hover:underline">
               Check Status →
             </a>
           </div>
@@ -245,8 +262,8 @@ export default function SupportPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Phone</p>
-                    <a href="tel:+2348001234567" className="text-blue-600 hover:underline">
-                      +234 800 123 4567
+                    <a href="tel:+2347049490588" className="text-blue-600 hover:underline">
+                      +234 704 949 0588
                     </a>
                     <p className="text-sm text-gray-600 mt-1">Available 24/7</p>
                   </div>
@@ -260,8 +277,8 @@ export default function SupportPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">Email</p>
-                    <a href="mailto:support@phonefix.com" className="text-blue-600 hover:underline break-all">
-                      support@phonefix.com
+                    <a href="mailto:technicalphonefix@gmail.com" className="text-blue-600 hover:underline break-all">
+                      technicalphonefix@gmail.com
                     </a>
                     <p className="text-sm text-gray-600 mt-1">Response within 24 hours</p>
                   </div>

@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Star, CheckCircle, MessageSquare, Clock, ThumbsUp, DollarSign, Users } from 'lucide-react';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 const ratingLabels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
@@ -14,18 +16,33 @@ const quickFeedback = [
 ];
 
 export default function RateEngineer() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+  const [orderData, setOrderData] = useState(null);
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedChips, setSelectedChips] = useState([]);
   const [feedback, setFeedback] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const jobDetails = {
-    orderId: 'ORD-2024-001',
-    device: 'iPhone 14 Pro',
-    problem: 'Screen Replacement',
-    engineer: 'John Smith',
-    completedDate: 'Jan 25, 2024'
+  useEffect(() => {
+    if (orderId) {
+      loadOrderData();
+    }
+  }, [orderId]);
+
+  const loadOrderData = async () => {
+    try {
+      const { data } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+      if (data) setOrderData(data);
+    } catch (error) {
+      console.error('Error loading order:', error);
+    }
   };
 
   const toggleChip = (chipId) => {
@@ -34,11 +51,50 @@ export default function RateEngineer() {
     );
   };
 
-  const handleSubmit = () => {
-    if (rating > 0) {
+  const handleSubmit = async () => {
+    if (rating === 0 || !orderData) return;
+    
+    setIsSubmitting(true);
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      await supabase
+        .from('orders')
+        .update({ 
+          rating, 
+          review: feedback,
+          quick_feedback: selectedChips 
+        })
+        .eq('id', orderData.id);
+      
+      if (orderData.engineer_id) {
+        await supabase
+          .from('engineer_ratings')
+          .insert({
+            engineer_id: orderData.engineer_id,
+            customer_id: user.id,
+            order_id: orderData.id,
+            rating,
+            review: feedback,
+            quick_feedback: selectedChips
+          });
+      }
+      
       setSubmitted(true);
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  if (!orderData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <p className="text-gray-500">Loading order details...</p>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
@@ -90,19 +146,19 @@ export default function RateEngineer() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <p className="text-gray-500">Order ID</p>
-                  <p className="font-semibold text-gray-900">{jobDetails.orderId}</p>
+                  <p className="font-semibold text-gray-900">{orderData.order_number}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Completed</p>
-                  <p className="font-semibold text-gray-900">{jobDetails.completedDate}</p>
+                  <p className="font-semibold text-gray-900">{new Date(orderData.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Device</p>
-                  <p className="font-semibold text-gray-900">{jobDetails.device}</p>
+                  <p className="font-semibold text-gray-900">{orderData.device_info}</p>
                 </div>
                 <div>
                   <p className="text-gray-500">Engineer</p>
-                  <p className="font-semibold text-gray-900">{jobDetails.engineer}</p>
+                  <p className="font-semibold text-gray-900">{orderData.engineer_name || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -192,14 +248,14 @@ export default function RateEngineer() {
             {/* Submit Button */}
             <button
               onClick={handleSubmit}
-              disabled={rating === 0}
+              disabled={rating === 0 || isSubmitting}
               className={`w-full py-4 rounded-lg font-semibold text-lg transition-all ${
-                rating > 0
+                rating > 0 && !isSubmitting
                   ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl active:scale-98'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              {rating > 0 ? 'Submit Rating' : 'Select a rating to continue'}
+              {isSubmitting ? 'Submitting...' : rating > 0 ? 'Submit Rating' : 'Select a rating to continue'}
             </button>
 
             {/* Reassurance Note */}
