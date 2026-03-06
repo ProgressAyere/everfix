@@ -1,9 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Star, CheckCircle, MessageSquare, Clock, ThumbsUp, DollarSign, Users } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 const ratingLabels = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
 
@@ -88,10 +90,23 @@ export default function RateEngineer() {
     }
   };
 
-  if (!orderData) {
+  if (!orderData && orderId) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
         <p className="text-gray-500">Loading order details...</p>
+      </div>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <p className="text-gray-600 mb-6">No order selected. Please select an order to rate.</p>
+          <Link href="/dashboardC" className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+            Go to Dashboard
+          </Link>
+        </div>
       </div>
     );
   }
