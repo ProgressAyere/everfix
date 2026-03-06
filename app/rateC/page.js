@@ -17,7 +17,7 @@ const quickFeedback = [
   { id: 'recommend', label: 'Would Recommend', icon: Users }
 ];
 
-export default function RateEngineer() {
+function RateEngineerContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [orderData, setOrderData] = useState(null);
@@ -310,5 +310,17 @@ export default function RateEngineer() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function RateEngineer() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    }>
+      <RateEngineerContent />
+    </Suspense>
   );
 }
