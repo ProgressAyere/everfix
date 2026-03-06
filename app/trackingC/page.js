@@ -1,9 +1,11 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Truck, Wrench, Phone, MessageSquare, FileText, Star, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 const stages = [
   { id: 1, name: 'Pending', description: 'Order placed, awaiting pickup' },
@@ -12,7 +14,7 @@ const stages = [
   { id: 4, name: 'Returned', description: 'Device repaired and delivered' }
 ];
 
-export default function TrackingPage() {
+function TrackingPageContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const [orderData, setOrderData] = useState(null);
@@ -377,5 +379,17 @@ export default function TrackingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 pt-20 pb-12 flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    }>
+      <TrackingPageContent />
+    </Suspense>
   );
 }
