@@ -441,6 +441,42 @@ const resetPassword = async (req, res) => {
   }
 };
 
+// Delete User (Admin)
+const deleteUser = async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    // Delete from Supabase Auth
+    const { data: userData } = await supabase.auth.admin.listUsers();
+    const authUser = userData.users.find(u => u.email === email);
+    
+    if (authUser) {
+      await supabase.auth.admin.deleteUser(authUser.id);
+    }
+
+    // Delete from local database
+    await supabase.from('users').delete().eq('email', email);
+
+    res.status(200).json({
+      success: true,
+      message: 'User deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -448,5 +484,6 @@ module.exports = {
   refreshAccessToken,
   signOutAll,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  deleteUser
 };

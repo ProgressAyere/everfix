@@ -7,7 +7,8 @@ const {
   refreshAccessToken,
   signOutAll,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  deleteUser
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 
@@ -18,6 +19,9 @@ router.post('/signout', signOut);
 router.post('/refresh', refreshAccessToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+
+// Admin routes
+router.delete('/admin/delete-user/:email', deleteUser);
 
 // Protected routes
 router.post('/signout-all', authenticate, signOutAll);
