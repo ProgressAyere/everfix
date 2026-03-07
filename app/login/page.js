@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -105,6 +106,14 @@ export default function AuthPage() {
       localStorage.setItem('userName', data.data.user.fullName);
       localStorage.setItem('userEmail', data.data.user.email);
       localStorage.setItem('userId', data.data.user.id);
+      localStorage.setItem('user', JSON.stringify(data.data.user));
+      
+      // Set Supabase session for authenticated uploads
+      await supabase.auth.setSession({
+        access_token: data.data.accessToken,
+        refresh_token: data.data.accessToken
+      });
+      
       window.dispatchEvent(new Event('storage'));
       
       const redirectPath = localStorage.getItem('redirectAfterLogin');
