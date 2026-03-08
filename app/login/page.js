@@ -108,11 +108,15 @@ export default function AuthPage() {
       localStorage.setItem('userId', data.data.user.id);
       localStorage.setItem('user', JSON.stringify(data.data.user));
       
-      // Set Supabase session for authenticated uploads
-      await supabase.auth.setSession({
-        access_token: data.data.accessToken,
-        refresh_token: data.data.accessToken
-      });
+      // Sign in to Supabase with email/password for authenticated storage access
+      try {
+        await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password
+        });
+      } catch (supabaseError) {
+        console.error('Supabase auth error:', supabaseError);
+      }
       
       window.dispatchEvent(new Event('storage'));
       

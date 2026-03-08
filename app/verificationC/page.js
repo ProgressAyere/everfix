@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { UserCircle, Smartphone, MapPin, Users, Lock, Camera, Shield, PartyPopper } from 'lucide-react';
+import Link from 'next/link';
+import { UserCircle, Smartphone, MapPin, Users, Lock, Camera, Shield, PartyPopper, Clock, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function CustomerVerificationPage() {
@@ -53,8 +54,37 @@ export default function CustomerVerificationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const [stream, setStream] = useState(null);
+  const [verificationStatus, setVerificationStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    checkVerificationStatus();
+  }, []);
+
+  const checkVerificationStatus = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (user.id) {
+        const { data } = await supabase
+          .from('customers_verification')
+          .select('verification_status')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data) {
+          setVerificationStatus(data.verification_status);
+        }
+      }
+    } catch (error) {
+      console.error('Error checking verification:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    checkVerificationStatus();
+    
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
     const accessToken = localStorage.getItem('accessToken');
     
@@ -244,10 +274,61 @@ export default function CustomerVerificationPage() {
     }
   };
 
-  const handleSaveForLater = () => {
-    localStorage.setItem('customerVerificationData', JSON.stringify(formData));
-    localStorage.setItem('customerVerificationStatus', 'partial');
-    router.push('/dashboardC');
+  const handleSaveForLater = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      // Upload any existing images
+      const uploadImage = async (file, path) => {
+        if (!file) return null;
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${userData.id || 'user'}_${path}_${Date.now()}.${fileExt}`;
+        const { data, error } = await supabase.storage
+          .from('verification-documents')
+          .upload(fileName, file);
+        if (error) return null;
+        return supabase.storage.from('verification-documents').getPublicUrl(fileName).data.publicUrl;
+      };
+
+      const livePhotoUrl = await uploadImage(formData.livePhoto, 'live_photo');
+      const ninFrontUrl = await uploadImage(formData.ninFront, 'nin_front');
+      const ninBackUrl = await uploadImage(formData.ninBack, 'nin_back');
+
+      // Upsert partial data to Supabase
+      await supabase
+        .from('customers_verification')
+        .upsert({
+          user_id: userData.id,
+          full_name: formData.fullName || null,
+          email: formData.email || null,
+          live_photo_url: livePhotoUrl,
+          identity_card_type: formData.identityCardType || null,
+          nin_front_url: ninFrontUrl,
+          nin_back_url: ninBackUrl,
+          nin_number: formData.nin || null,
+          phone: formData.phone || null,
+          address: formData.address || null,
+          state: formData.state || null,
+          lga: formData.lga || null,
+          landmark: formData.landmark || null,
+          device_brand: formData.deviceBrand || null,
+          device_model: formData.deviceModel || null,
+          emergency_name: formData.emergencyName || null,
+          emergency_phone: formData.emergencyPhone || null,
+          emergency_relationship: formData.emergencyRelationship || null,
+          verification_status: 'partial'
+        }, { onConflict: 'user_id' });
+
+      localStorage.setItem('customerVerificationData', JSON.stringify(formData));
+      localStorage.setItem('customerVerificationStatus', 'partial');
+      router.push('/dashboardC');
+    } catch (error) {
+      console.error('Error saving verification:', error);
+      // Fallback to localStorage only
+      localStorage.setItem('customerVerificationData', JSON.stringify(formData));
+      localStorage.setItem('customerVerificationStatus', 'partial');
+      router.push('/dashboardC');
+    }
   };
 
   const handleSubmit = async () => {
@@ -332,6 +413,63 @@ export default function CustomerVerificationPage() {
     ].filter(Boolean).length;
     return Math.round((completed / 6) * 100);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 pb-12 flex items-center justify-center">
+        <p className="text-gray-500">Loading...</p>
+      </div>
+    );
+  }
+
+  if (verificationStatus === 'pending' || verificationStatus === 'partial') {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 pb-12 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Clock className="text-yellow-600" size={48} />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">KYC Awaiting Approval</h1>
+          <p className="text-gray-600 mb-6">
+            Your verification documents are under review. This process typically takes 2-3 business days.
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-blue-800">
+              You'll receive an email notification once your verification is complete.
+            </p>
+          </div>
+          <Link
+            href="/dashboardC"
+            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (verificationStatus === 'verified') {
+    return (
+      <div className="min-h-screen bg-gray-50 pt-20 pb-12 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="text-green-600" size={48} />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Verification Successful!</h1>
+          <p className="text-gray-600 mb-6">
+            Your account has been verified. You can now enjoy full access to all our services.
+          </p>
+          <Link
+            href="/dashboardC"
+            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">

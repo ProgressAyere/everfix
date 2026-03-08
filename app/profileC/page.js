@@ -77,6 +77,7 @@ export default function ProfileC() {
           .single();
 
         if (data && !error) {
+          const imageUrl = data.profile_image_url || null;
           setUserData({
             fullName: data.full_name || '',
             email: data.email || user.email || '',
@@ -86,9 +87,9 @@ export default function ProfileC() {
             lga: data.lga || '',
             landmark: data.landmark || '',
             verificationStatus: data.verification_status || 'unverified',
-            profileImageUrl: data.profile_image_url || null
+            profileImageUrl: imageUrl
           });
-          setProfileImage(data.profile_image_url);
+          setProfileImage(imageUrl);
           if (data.secondary_address) {
             setSecondaryAddress(JSON.parse(data.secondary_address));
           }
@@ -215,6 +216,8 @@ export default function ProfileC() {
         .from('verification-documents')
         .getPublicUrl(fileName);
 
+      console.log('Uploaded image URL:', publicUrl);
+
       const { error: updateError } = await supabase
         .from('customers_verification')
         .update({ profile_image_url: publicUrl })
@@ -225,6 +228,7 @@ export default function ProfileC() {
       setProfileImage(publicUrl);
       setUserData(prev => ({ ...prev, profileImageUrl: publicUrl }));
       setShowImageUpload(false);
+      await loadUserData(); // Reload to confirm
     } catch (error) {
       console.error('Error uploading profile image:', error);
     }
