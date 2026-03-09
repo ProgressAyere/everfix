@@ -265,7 +265,7 @@ export default function ProfileC() {
   };
 
   const getVerificationBadge = () => {
-    if (userData.verificationStatus === 'verified') {
+    if (userData.verificationStatus === 'verified' || userData.verificationStatus === 'approved') {
       return (
         <div className="mt-2 inline-flex items-center gap-1 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
           <CheckCircle size={12} />
@@ -375,18 +375,19 @@ export default function ProfileC() {
     if (deleteConfirmText !== 'DELETE') return;
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      const deletionDate = new Date();
-      deletionDate.setDate(deletionDate.getDate() + 30);
       
-      await supabase.from('users').update({ 
-        is_deactivated: true, 
-        deactivation_date: new Date().toISOString(),
-        scheduled_deletion_date: deletionDate.toISOString()
-      }).eq('id', user.id);
-      
-      await supabase.auth.signOut();
-      localStorage.clear();
-      window.location.href = '/login';
+      // Call backend to deactivate account
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/deactivate-account`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+
+      if (res.ok) {
+        await supabase.auth.signOut();
+        localStorage.clear();
+        window.location.href = '/login';
+      }
     } catch (error) {
       console.error('Error deleting account:', error);
     }

@@ -477,6 +477,139 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Deactivate Account (Customer)
+const deactivateAccount = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    const deletionDate = new Date();
+    deletionDate.setDate(deletionDate.getDate() + 30);
+
+    await supabase
+      .from('users')
+      .update({
+        is_deactivated: true,
+        deactivation_date: new Date().toISOString(),
+        scheduled_deletion_date: deletionDate.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('email', email);
+
+    res.status(200).json({
+      success: true,
+      message: 'Account deactivated. You have 30 days to reactivate.'
+    });
+  } catch (error) {
+    console.error('Deactivate account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Admin Login
+const adminLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const { data, error } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    const isPasswordValid = await comparePassword(password, data.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid credentials'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Credentials verified'
+    });
+  } catch (error) {
+    console.error('Admin login error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
+// Admin Security Verification
+const adminVerifySecurity = async (req, res) => {
+  try {
+    const { email, securityAnswers } = req.body;
+
+    const { data, error } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error || !data) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid request'
+      });
+    }
+
+    const answers = [
+      data.security_answer_1?.toLowerCase().trim(),
+      data.security_answer_2?.toLowerCase().trim(),
+      data.security_answer_3?.toLowerCase().trim()
+    ];
+
+    const providedAnswers = securityAnswers.map(a => a.toLowerCase().trim());
+
+    if (answers[0] !== providedAnswers[0] || 
+        answers[1] !== providedAnswers[1] || 
+        answers[2] !== providedAnswers[2]) {
+      return res.status(401).json({
+        success: false,
+        message: 'Security verification failed'
+      });
+    }
+
+    const token = generateAccessToken(data.id, data.email, 'admin');
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      token,
+      admin: {
+        id: data.id,
+        email: data.email,
+        name: data.name
+      }
+    });
+  } catch (error) {
+    console.error('Admin security verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -485,5 +618,8 @@ module.exports = {
   signOutAll,
   forgotPassword,
   resetPassword,
-  deleteUser
+  deleteUser,
+  deactivateAccount,
+  adminLogin,
+  adminVerifySecurity
 };

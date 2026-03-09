@@ -82,6 +82,30 @@ export default function CustomerVerificationPage() {
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (verificationStatus === 'approved' || verificationStatus === 'verified') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-12 h-12 text-green-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">KYC Verified</h1>
+          <p className="text-gray-600 mb-6">Your account has been successfully verified</p>
+          <Link
+            href="/dashboardC"
+            className="inline-block bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+          >
+            Go to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     checkVerificationStatus();
     

@@ -69,6 +69,7 @@ export default function CustomerDashboard() {
   const getVerificationBadge = () => {
     switch(verificationStatus) {
       case 'verified':
+      case 'approved':
         return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1"><CheckCircle size={16} /> Verified</span>;
       case 'pending':
         return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-yellow-600" /> Verification Pending</span>;
@@ -102,7 +103,7 @@ export default function CustomerDashboard() {
         </div>
 
         {/* Verification Alert Banner */}
-        {verificationStatus !== 'verified' && (
+        {verificationStatus !== 'verified' && verificationStatus !== 'approved' && (
           <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-hidden">
             <Link href="/verificationC" className="block">
               <div className="flex items-center gap-3">

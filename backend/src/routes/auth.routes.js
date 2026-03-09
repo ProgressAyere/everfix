@@ -8,7 +8,10 @@ const {
   signOutAll,
   forgotPassword,
   resetPassword,
-  deleteUser
+  deleteUser,
+  deactivateAccount,
+  adminLogin,
+  adminVerifySecurity
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 
@@ -19,8 +22,11 @@ router.post('/signout', signOut);
 router.post('/refresh', refreshAccessToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.post('/deactivate-account', deactivateAccount);
 
 // Admin routes
+router.post('/admin/login', adminLogin);
+router.post('/admin/verify-security', adminVerifySecurity);
 router.delete('/admin/delete-user/:email', deleteUser);
 
 // Protected routes

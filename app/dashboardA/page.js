@@ -1,5 +1,8 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { LogOut, ChevronDown, ChevronUp } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 const mockPendingEngineers = [
   { id: 1, name: 'Adebayo Oluwaseun', email: 'adebayo.o@email.com', phone: '+234 803 456 7890', specialization: 'iPhone Specialist', experience: '5 years', appliedDate: '2024-01-15', documents: 'Verified' },
@@ -15,8 +18,104 @@ const mockActiveOrders = [
 ];
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [pendingEngineers, setPendingEngineers] = useState(mockPendingEngineers);
+  const [pendingCustomers, setPendingCustomers] = useState(0);
+  const [pendingRiders, setPendingRiders] = useState(0);
+  const [approvedCustomers, setApprovedCustomers] = useState([]);
+  const [rejectedCustomers, setRejectedCustomers] = useState([]);
+  const [approvedEngineers, setApprovedEngineers] = useState([]);
+  const [rejectedEngineers, setRejectedEngineers] = useState([]);
+  const [approvedRiders, setApprovedRiders] = useState([]);
+  const [rejectedRiders, setRejectedRiders] = useState([]);
+  const [showCustomersDropdown, setShowCustomersDropdown] = useState(false);
+  const [showEngineersDropdown, setShowEngineersDropdown] = useState(false);
+  const [showRidersDropdown, setShowRidersDropdown] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+
+  useEffect(() => {
+    const adminToken = localStorage.getItem('adminToken');
+    if (!adminToken) {
+      router.push('/adminLogin');
+    }
+    fetchPendingCounts();
+    fetchCustomers();
+    fetchEngineers();
+    fetchRiders();
+  }, [router]);
+
+  const fetchPendingCounts = async () => {
+    const { data: customers } = await supabase
+      .from('customers_verification')
+      .select('id', { count: 'exact' })
+      .in('verification_status', ['pending', 'partial', 'unverified']);
+    
+    const { data: riders } = await supabase
+      .from('riders_verification')
+      .select('id', { count: 'exact' })
+      .in('verification_status', ['pending', 'partial', 'unverified']);
+    
+    setPendingCustomers(customers?.length || 0);
+    setPendingRiders(riders?.length || 0);
+  };
+
+  const fetchCustomers = async () => {
+    const { data: approved } = await supabase
+      .from('customers_verification')
+      .select('*')
+      .eq('verification_status', 'approved')
+      .order('created_at', { ascending: false });
+    
+    const { data: rejected } = await supabase
+      .from('customers_verification')
+      .select('*')
+      .eq('verification_status', 'rejected')
+      .order('created_at', { ascending: false });
+    
+    setApprovedCustomers(approved || []);
+    setRejectedCustomers(rejected || []);
+  };
+
+  const fetchEngineers = async () => {
+    const { data: approved } = await supabase
+      .from('engineers_verification')
+      .select('*')
+      .eq('verification_status', 'approved')
+      .order('created_at', { ascending: false });
+    
+    const { data: rejected } = await supabase
+      .from('engineers_verification')
+      .select('*')
+      .eq('verification_status', 'rejected')
+      .order('created_at', { ascending: false });
+    
+    setApprovedEngineers(approved || []);
+    setRejectedEngineers(rejected || []);
+  };
+
+  const fetchRiders = async () => {
+    const { data: approved } = await supabase
+      .from('riders_verification')
+      .select('*')
+      .eq('verification_status', 'approved')
+      .order('created_at', { ascending: false });
+    
+    const { data: rejected } = await supabase
+      .from('riders_verification')
+      .select('*')
+      .eq('verification_status', 'rejected')
+      .order('created_at', { ascending: false });
+    
+    setApprovedRiders(approved || []);
+    setRejectedRiders(rejected || []);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    router.push('/adminLogin');
+  };
 
   const handleApprove = (engineerId) => {
     setConfirmAction({ type: 'approve', engineerId });
@@ -57,9 +156,18 @@ export default function AdminDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-1">Platform oversight and management</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p className="text-gray-600 mt-1">Platform oversight and management</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
 
         {/* Analytics Cards */}
@@ -191,6 +299,303 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Customer Approval Card */}
+        <div className="bg-white rounded-xl shadow-sm mb-8 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Pending Customer Approvals</h2>
+              <p className="text-sm text-gray-600 mt-1">{pendingCustomers} verifications awaiting review</p>
+            </div>
+            <button
+              onClick={() => router.push('/dashboardA/verifications')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Review Customers
+            </button>
+          </div>
+        </div>
+
+        {/* Rider Approval Card */}
+        <div className="bg-white rounded-xl shadow-sm mb-8 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Pending Rider Approvals</h2>
+              <p className="text-sm text-gray-600 mt-1">{pendingRiders} applications awaiting review</p>
+            </div>
+            <button
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+            >
+              Review Riders
+            </button>
+          </div>
+        </div>
+
+        {/* Customers Dropdown Section */}
+        <div className="bg-white rounded-xl shadow-sm mb-8">
+          <button
+            onClick={() => setShowCustomersDropdown(!showCustomersDropdown)}
+            className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition"
+          >
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Customers</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {approvedCustomers.length} approved, {rejectedCustomers.length} rejected
+              </p>
+            </div>
+            {showCustomersDropdown ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+          </button>
+
+          {showCustomersDropdown && (
+            <div className="border-t border-gray-200">
+              {/* Approved Customers */}
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-green-700 mb-4">Approved Customers ({approvedCustomers.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Approved Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {approvedCustomers.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No approved customers</td>
+                        </tr>
+                      ) : (
+                        approvedCustomers.map(customer => (
+                          <tr key={customer.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(customer.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Rejected Customers */}
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-red-700 mb-4">Rejected Customers ({rejectedCustomers.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Rejected Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {rejectedCustomers.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No rejected customers</td>
+                        </tr>
+                      ) : (
+                        rejectedCustomers.map(customer => (
+                          <tr key={customer.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{customer.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(customer.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Engineers Dropdown Section */}
+        <div className="bg-white rounded-xl shadow-sm mb-8">
+          <button
+            onClick={() => setShowEngineersDropdown(!showEngineersDropdown)}
+            className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition"
+          >
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Engineers</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {approvedEngineers.length} approved, {rejectedEngineers.length} rejected
+              </p>
+            </div>
+            {showEngineersDropdown ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+          </button>
+
+          {showEngineersDropdown && (
+            <div className="border-t border-gray-200">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-green-700 mb-4">Approved Engineers ({approvedEngineers.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Approved Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {approvedEngineers.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No approved engineers</td>
+                        </tr>
+                      ) : (
+                        approvedEngineers.map(engineer => (
+                          <tr key={engineer.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(engineer.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-red-700 mb-4">Rejected Engineers ({rejectedEngineers.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Rejected Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {rejectedEngineers.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No rejected engineers</td>
+                        </tr>
+                      ) : (
+                        rejectedEngineers.map(engineer => (
+                          <tr key={engineer.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{engineer.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(engineer.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Riders Dropdown Section */}
+        <div className="bg-white rounded-xl shadow-sm mb-8">
+          <button
+            onClick={() => setShowRidersDropdown(!showRidersDropdown)}
+            className="w-full p-6 flex items-center justify-between hover:bg-gray-50 transition"
+          >
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Riders</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                {approvedRiders.length} approved, {rejectedRiders.length} rejected
+              </p>
+            </div>
+            {showRidersDropdown ? <ChevronUp className="w-6 h-6" /> : <ChevronDown className="w-6 h-6" />}
+          </button>
+
+          {showRidersDropdown && (
+            <div className="border-t border-gray-200">
+              <div className="p-6 border-b border-gray-200">
+                <h3 className="text-lg font-bold text-green-700 mb-4">Approved Riders ({approvedRiders.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Approved Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {approvedRiders.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No approved riders</td>
+                        </tr>
+                      ) : (
+                        approvedRiders.map(rider => (
+                          <tr key={rider.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(rider.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-red-700 mb-4">Rejected Riders ({rejectedRiders.length})</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Name</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Email</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Phone</th>
+                        <th className="px-4 py-2 text-left text-xs font-semibold text-gray-700">Rejected Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {rejectedRiders.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="px-4 py-8 text-center text-gray-500">No rejected riders</td>
+                        </tr>
+                      ) : (
+                        rejectedRiders.map(rider => (
+                          <tr key={rider.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.full_name}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.email}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{rider.phone}</td>
+                            <td className="px-4 py-3 text-sm text-gray-600">
+                              {new Date(rider.updated_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Active Orders Overview */}

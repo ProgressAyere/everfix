@@ -1,9 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Eye, LogOut, ArrowLeft } from 'lucide-react';
 
 export default function VerificationsPage() {
+  const router = useRouter();
   const [verifications, setVerifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedVerification, setSelectedVerification] = useState(null);
@@ -13,37 +15,81 @@ export default function VerificationsPage() {
     fetchVerifications();
   }, [filter]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    router.push('/adminLogin');
+  };
+
   const fetchVerifications = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    let query = supabase
       .from('customers_verification')
       .select('*')
-      .eq('verification_status', filter)
       .order('created_at', { ascending: false });
-
+    
+    if (filter === 'pending') {
+      query = query.in('verification_status', ['pending', 'partial', 'unverified']);
+    } else {
+      query = query.eq('verification_status', filter);
+    }
+    
+    const { data, error } = await query;
+    
+    console.log('Verifications data:', data);
+    console.log('Error:', error);
+    
     if (!error) setVerifications(data || []);
     setLoading(false);
   };
 
   const handleApprove = async (id) => {
-    const { error } = await supabase
+    const verification = verifications.find(v => v.id === id);
+    
+    // Update customers_verification table
+    const { error: verifyError } = await supabase
       .from('customers_verification')
       .update({ verification_status: 'approved', updated_at: new Date() })
       .eq('id', id);
 
-    if (!error) {
+    if (!verifyError && verification) {
+      // Update users table
+      await supabase
+        .from('users')
+        .update({ 
+          is_verified: true, 
+          verification_status: 'verified',
+          updated_at: new Date() 
+        })
+        .eq('email', verification.email);
+
       fetchVerifications();
       setSelectedVerification(null);
     }
   };
 
   const handleReject = async (id) => {
-    const { error } = await supabase
+    const verification = verifications.find(v => v.id === id);
+    
+    // Update customers_verification table
+    const { error: verifyError } = await supabase
       .from('customers_verification')
       .update({ verification_status: 'rejected', updated_at: new Date() })
       .eq('id', id);
 
-    if (!error) {
+    if (!verifyError && verification) {
+      // Update users table
+      await supabase
+        .from('users')
+        .update({ 
+          is_verified: false, 
+          verification_status: 'failed',
+          updated_at: new Date() 
+        })
+        .eq('email', verification.email);
+
       fetchVerifications();
       setSelectedVerification(null);
     }
@@ -52,9 +98,26 @@ export default function VerificationsPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Customer Verifications</h1>
-          <p className="text-gray-600 mt-1">Review and approve customer verification requests</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/dashboardA')}
+              className="p-2 hover:bg-gray-100 rounded-lg transition"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Customer Verifications</h1>
+              <p className="text-gray-600 mt-1">Review and approve customer verification requests</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </button>
         </div>
 
         {/* Filter Tabs */}

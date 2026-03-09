@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { User } from 'lucide-react';
+import { User, CheckCircle } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function Header() {
@@ -12,6 +12,7 @@ export default function Header() {
   const [userName, setUserName] = useState('USER');
   const [isOnline, setIsOnline] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [isVerified, setIsVerified] = useState(false);
   const profileRef = useRef(null);
   const menuRef = useRef(null);
 
@@ -47,12 +48,13 @@ export default function Header() {
       if (user.id) {
         const { data: verificationData } = await supabase
           .from('customers_verification')
-          .select('full_name')
+          .select('full_name, verification_status')
           .eq('user_id', user.id)
           .single();
         
         const fullName = verificationData?.full_name || localStorage.getItem('userName') || 'USER';
         setUserName(formatName(fullName));
+        setIsVerified(verificationData?.verification_status === 'approved' || verificationData?.verification_status === 'verified');
         
         // Load profile image
         const { data: imageData } = await supabase
@@ -191,7 +193,10 @@ export default function Header() {
                   {isLoggedIn ? (
                     <>
                       <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="text-sm font-semibold text-gray-900">{userName}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-900">{userName}</p>
+                          {isVerified && <CheckCircle size={16} className="text-green-500" />}
+                        </div>
                         <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                       </div>
                       {userRole === 'rider' && (
@@ -280,7 +285,10 @@ export default function Header() {
                   {isLoggedIn ? (
                     <>
                       <div className="px-4 py-3 border-b border-gray-200">
-                        <p className="text-sm font-semibold text-gray-900">{userName}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-gray-900">{userName}</p>
+                          {isVerified && <CheckCircle size={16} className="text-green-500" />}
+                        </div>
                         <p className="text-xs text-gray-500 capitalize">{userRole}</p>
                       </div>
                       {userRole === 'rider' && (
