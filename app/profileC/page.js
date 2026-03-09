@@ -70,6 +70,17 @@ export default function ProfileC() {
       const verificationStatus = localStorage.getItem('customerVerificationStatus');
       
       if (user.id) {
+        // Load profile image from customers_profile_image table
+        const { data: imageData } = await supabase
+          .from('customers_profile_image')
+          .select('image_url')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (imageData?.image_url) {
+          setProfileImage(imageData.image_url);
+        }
+        
         const { data, error } = await supabase
           .from('customers_verification')
           .select('*')
@@ -77,7 +88,7 @@ export default function ProfileC() {
           .single();
 
         if (data && !error) {
-          const imageUrl = data.profile_image_url || null;
+          const imageUrl = imageData?.image_url || null;
           setUserData({
             fullName: data.full_name || '',
             email: data.email || user.email || '',
@@ -89,7 +100,6 @@ export default function ProfileC() {
             verificationStatus: data.verification_status || 'unverified',
             profileImageUrl: imageUrl
           });
-          setProfileImage(imageUrl);
           if (data.secondary_address) {
             setSecondaryAddress(JSON.parse(data.secondary_address));
           }
@@ -201,34 +211,49 @@ export default function ProfileC() {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check file size (1MB = 1048576 bytes)
+    if (file.size > 1048576) {
+      alert('Image size must be less than 1MB');
+      return;
+    }
+
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}_profile_${Date.now()}.${fileExt}`;
       
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('verification-documents')
-        .upload(fileName, file);
+        .from('profile-images')
+        .upload(fileName, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
-        .from('verification-documents')
+        .from('profile-images')
         .getPublicUrl(fileName);
 
       console.log('Uploaded image URL:', publicUrl);
 
+      // Save to customers_profile_image table
       const { error: updateError } = await supabase
-        .from('customers_verification')
-        .update({ profile_image_url: publicUrl })
-        .eq('user_id', user.id);
+        .from('customers_profile_image')
+        .upsert({ 
+          user_id: user.id,
+          image_url: publicUrl,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
 
       if (updateError) throw updateError;
 
       setProfileImage(publicUrl);
       setUserData(prev => ({ ...prev, profileImageUrl: publicUrl }));
       setShowImageUpload(false);
-      await loadUserData(); // Reload to confirm
+      
+      // Trigger storage event to update header
+      window.dispatchEvent(new Event('storage'));
+      
+      // Force reload user data
+      await loadUserData();
     } catch (error) {
       console.error('Error uploading profile image:', error);
     }
@@ -413,6 +438,7 @@ export default function ProfileC() {
               onChange={handleProfileImageChange}
               className="hidden"
               id="profileImageInput"
+              name="profileImage"
             />
             <label htmlFor="profileImageInput" className="absolute bottom-0 right-0 w-7 h-7 bg-blue-500 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:bg-blue-600">
               <Camera size={14} />

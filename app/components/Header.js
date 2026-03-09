@@ -2,27 +2,73 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { User } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('customer');
-  const [userName, setUserName] = useState('Guest');
+  const [userName, setUserName] = useState('USER');
   const [isOnline, setIsOnline] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const profileRef = useRef(null);
   const menuRef = useRef(null);
 
+  const formatName = (fullName) => {
+    if (!fullName || fullName === 'User') return 'USER';
+    const parts = fullName.trim().split(' ');
+    if (parts.length <= 2) return fullName;
+    // If more than 2 names, show first two names + initial of last
+    const firstName = parts[0];
+    const secondName = parts[1];
+    const lastInitial = parts[parts.length - 1][0];
+    return `${firstName} ${secondName} ${lastInitial}.`;
+  };
+
   useEffect(() => {
-    const updateUserState = () => {
+    const updateUserState = async () => {
       const loggedIn = localStorage.getItem('userLoggedIn');
       const role = localStorage.getItem('userRole') || 'customer';
-      const name = localStorage.getItem('userName') || 'User';
       const online = localStorage.getItem('riderOnlineStatus') === 'true';
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
       setIsLoggedIn(!!loggedIn);
       setUserRole(role);
-      setUserName(name);
       setIsOnline(online);
+      
+      if (!loggedIn) {
+        setUserName('USER');
+        setProfileImage(null);
+        return;
+      }
+      
+      // Load full name from customers_verification table
+      if (user.id) {
+        const { data: verificationData } = await supabase
+          .from('customers_verification')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        const fullName = verificationData?.full_name || localStorage.getItem('userName') || 'USER';
+        setUserName(formatName(fullName));
+        
+        // Load profile image
+        const { data: imageData } = await supabase
+          .from('customers_profile_image')
+          .select('image_url')
+          .eq('user_id', user.id)
+          .single();
+        if (imageData?.image_url) {
+          setProfileImage(imageData.image_url);
+        } else {
+          setProfileImage(null);
+        }
+      } else {
+        setUserName('USER');
+        setProfileImage(null);
+      }
     };
     
     updateUserState();
@@ -65,9 +111,10 @@ export default function Header() {
     
     setIsLoggedIn(false);
     setUserRole('customer');
-    setUserName('User');
+    setUserName('USER');
     setIsOnline(false);
     setIsProfileOpen(false);
+    setProfileImage(null);
     
     window.location.href = '/';
   };
@@ -130,9 +177,13 @@ export default function Header() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition overflow-hidden"
               >
-                <User size={20} />
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={20} />
+                )}
               </button>
               
               {isProfileOpen && (
@@ -215,9 +266,13 @@ export default function Header() {
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600"
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 overflow-hidden"
               >
-                <User size={20} />
+                {profileImage ? (
+                  <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User size={20} />
+                )}
               </button>
               
               {isProfileOpen && (

@@ -70,6 +70,8 @@ export default function CustomerDashboard() {
     switch(verificationStatus) {
       case 'verified':
         return <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1"><CheckCircle size={16} /> Verified</span>;
+      case 'pending':
+        return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-yellow-600" /> Verification Pending</span>;
       case 'partial':
         return <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold flex items-center gap-1"><AlertTriangle size={16} className="text-yellow-600" /> Partially Verified</span>;
       default:
