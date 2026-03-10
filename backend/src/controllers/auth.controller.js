@@ -404,13 +404,11 @@ const resetPassword = async (req, res) => {
       });
     }
 
-    // Verify token and update password using Supabase
-    const { data, error } = await supabase.auth.updateUser({
-      password: password
-    });
+    // Get user from token
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    if (error) {
-      console.error('Supabase update password error:', error);
+    if (userError || !user) {
+      console.error('Get user error:', userError);
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired reset token'
@@ -419,19 +417,19 @@ const resetPassword = async (req, res) => {
 
     // Hash the new password and update in our database
     const hashedPassword = await hashPassword(password);
-    const user = await findUserByEmail(data.user.email);
+    const dbUser = await findUserByEmail(user.email);
     
-    if (user) {
+    if (dbUser) {
       await supabase
         .from('users')
         .update({ password: hashedPassword, updated_at: new Date() })
-        .eq('email', data.user.email);
+        .eq('email', user.email);
       
       // Clear all failed login attempts after successful password reset
       await supabase
         .from('login_attempts')
         .delete()
-        .eq('email', data.user.email.toLowerCase());
+        .eq('email', user.email.toLowerCase());
     }
 
     res.status(200).json({
