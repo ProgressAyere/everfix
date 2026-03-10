@@ -11,7 +11,8 @@ const {
   deleteUser,
   deactivateAccount,
   adminLogin,
-  adminVerifySecurity
+  adminVerifySecurity,
+  unlockAccount
 } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 
@@ -23,6 +24,7 @@ router.post('/refresh', refreshAccessToken);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/deactivate-account', deactivateAccount);
+router.post('/unlock-account', unlockAccount);
 
 // Admin routes
 router.post('/admin/login', adminLogin);

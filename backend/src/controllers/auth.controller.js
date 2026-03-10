@@ -426,6 +426,12 @@ const resetPassword = async (req, res) => {
         .from('users')
         .update({ password: hashedPassword, updated_at: new Date() })
         .eq('email', data.user.email);
+      
+      // Clear all failed login attempts after successful password reset
+      await supabase
+        .from('login_attempts')
+        .delete()
+        .eq('email', data.user.email.toLowerCase());
     }
 
     res.status(200).json({
@@ -610,6 +616,36 @@ const adminVerifySecurity = async (req, res) => {
   }
 };
 
+// Unlock Account
+const unlockAccount = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      });
+    }
+
+    await supabase
+      .from('login_attempts')
+      .delete()
+      .eq('email', email.toLowerCase());
+
+    res.status(200).json({
+      success: true,
+      message: 'Account unlocked successfully'
+    });
+  } catch (error) {
+    console.error('Unlock account error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
+};
+
 module.exports = {
   signUp,
   signIn,
@@ -621,5 +657,6 @@ module.exports = {
   deleteUser,
   deactivateAccount,
   adminLogin,
-  adminVerifySecurity
+  adminVerifySecurity,
+  unlockAccount
 };
