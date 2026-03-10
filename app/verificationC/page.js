@@ -58,27 +58,68 @@ export default function CustomerVerificationPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkVerificationStatus();
+    const initializeComponent = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem('user') || '{}');
+        const accessToken = localStorage.getItem('accessToken');
+        
+        // Set email from user data
+        if (userData.email) {
+          setFormData(prev => ({ ...prev, email: userData.email }));
+        } else if (accessToken) {
+          const userEmail = localStorage.getItem('userEmail');
+          if (userEmail) {
+            setFormData(prev => ({ ...prev, email: userEmail }));
+          }
+        }
+
+        // Check verification status
+        if (userData.id) {
+          const { data, error } = await supabase
+            .from('customers_verification')
+            .select('verification_status')
+            .eq('user_id', userData.id)
+            .maybeSingle(); // Use maybeSingle instead of single to avoid errors when no record exists
+          
+          if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+            console.error('Error checking verification:', error);
+          } else if (data) {
+            setVerificationStatus(data.verification_status);
+          }
+        }
+      } catch (error) {
+        console.error('Error initializing component:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeComponent();
   }, []);
 
   const checkVerificationStatus = async () => {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.id) {
-        const { data } = await supabase
+        // Add proper headers for Supabase API calls
+        const { data, error } = await supabase
           .from('customers_verification')
           .select('verification_status')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
-        if (data) {
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking verification:', error);
+          // If there's an authentication error, the user might need to log in again
+          if (error.code === '401' || error.message?.includes('JWT')) {
+            console.warn('Authentication issue detected, user may need to re-login');
+          }
+        } else if (data) {
           setVerificationStatus(data.verification_status);
         }
       }
     } catch (error) {
       console.error('Error checking verification:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -106,22 +147,7 @@ export default function CustomerVerificationPage() {
     );
   }
 
-  useEffect(() => {
-    checkVerificationStatus();
-    
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    const accessToken = localStorage.getItem('accessToken');
-    
-    if (userData.email) {
-      setFormData(prev => ({ ...prev, email: userData.email }));
-    } else if (accessToken) {
-      // Try to get email from token or other storage
-      const userEmail = localStorage.getItem('userEmail');
-      if (userEmail) {
-        setFormData(prev => ({ ...prev, email: userEmail }));
-      }
-    }
-  }, []);
+
 
   const steps = [
     { id: 1, title: 'Basic Identity', icon: UserCircle, required: true },

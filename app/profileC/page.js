@@ -71,11 +71,15 @@ export default function ProfileC() {
       
       if (user.id) {
         // Load profile image from customers_profile_image table
-        const { data: imageData } = await supabase
+        const { data: imageData, error: imageError } = await supabase
           .from('customers_profile_image')
           .select('image_url')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single to avoid 406 errors
+        
+        if (imageError && imageError.code !== 'PGRST116') {
+          console.error('Error loading profile image:', imageError);
+        }
         
         if (imageData?.image_url) {
           setProfileImage(imageData.image_url);
@@ -85,7 +89,7 @@ export default function ProfileC() {
           .from('customers_verification')
           .select('*')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle here too
 
         if (data && !error) {
           const imageUrl = imageData?.image_url || null;

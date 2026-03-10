@@ -46,22 +46,31 @@ export default function Header() {
       
       // Load full name from customers_verification table
       if (user.id) {
-        const { data: verificationData } = await supabase
+        const { data: verificationData, error: verificationError } = await supabase
           .from('customers_verification')
           .select('full_name, verification_status')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single
+        
+        if (verificationError && verificationError.code !== 'PGRST116') {
+          console.error('Error loading verification data:', verificationError);
+        }
         
         const fullName = verificationData?.full_name || localStorage.getItem('userName') || 'USER';
         setUserName(formatName(fullName));
         setIsVerified(verificationData?.verification_status === 'approved' || verificationData?.verification_status === 'verified');
         
         // Load profile image
-        const { data: imageData } = await supabase
+        const { data: imageData, error: imageError } = await supabase
           .from('customers_profile_image')
           .select('image_url')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single
+          
+        if (imageError && imageError.code !== 'PGRST116') {
+          console.error('Error loading profile image:', imageError);
+        }
+        
         if (imageData?.image_url) {
           setProfileImage(imageData.image_url);
         } else {

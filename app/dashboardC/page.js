@@ -19,11 +19,16 @@ export default function CustomerDashboard() {
     try {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       if (user.id) {
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('customers_verification')
           .select('verification_status')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle(); // Use maybeSingle instead of single
+          
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading verification status:', error);
+        }
+        
         if (data) setVerificationStatus(data.verification_status || 'unverified');
       }
     } catch (error) {
